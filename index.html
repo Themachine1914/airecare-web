@@ -298,6 +298,11 @@ textarea { resize: vertical; }
   color: var(--exito); background: rgba(34, 122, 85, 0.08); border: 1px solid rgba(34, 122, 85, 0.3);
 }
 
+.seccion-solicitud a {
+  color: var(--primario); font-weight: 600; text-decoration: none;
+}
+.seccion-solicitud a:hover { text-decoration: underline; }
+
 /* ---------- Pie ---------- */
 .pie { border-top: 1px solid var(--borde); padding: 34px 0; background: var(--fondo-2); }
 .pie-inner { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; justify-content: space-between; color: var(--muted); font-size: 0.88rem; }
@@ -550,7 +555,7 @@ textarea { resize: vertical; }
           </details>
           <details class="faq-item">
             <summary>¿Cómo solicito el servicio?</summary>
-            <p>Llena el formulario de solicitud con tus datos y el plan de tu interés. Te contactamos por teléfono o WhatsApp para agendar la primera visita.</p>
+            <p>Llena el formulario de solicitud con tus datos, ubicación y el plan de tu interés. Se abre WhatsApp al número del negocio para enviar el mensaje y también queda guardado en el panel.</p>
           </details>
         </div>
       </div>
@@ -562,8 +567,14 @@ textarea { resize: vertical; }
         <div>
           <h2 class="titulo-seccion">Solicita tu plan</h2>
           <p class="muted" style="max-width:420px">
-            Déjanos tus datos y te contactamos para agendar la primera visita y resolver
-            cualquier duda sobre los planes. Sin compromiso.
+            Déjanos tus datos (incluido dónde estás) y te escribimos por WhatsApp para agendar
+            la primera visita y resolver cualquier duda. Sin compromiso.
+          </p>
+          <p class="muted" style="max-width:420px; margin-top:14px">
+            WhatsApp:
+            <a href="https://wa.me/18296372748" target="_blank" rel="noopener noreferrer" id="enlace-whatsapp-publico">
+              +1 829 637 2748
+            </a>
           </p>
         </div>
         <form class="form-card" id="form-solicitud" novalidate>
@@ -573,17 +584,20 @@ textarea { resize: vertical; }
           <label for="s-telefono">Teléfono / WhatsApp *</label>
           <input type="tel" id="s-telefono" autocomplete="tel" placeholder="Ej. 809 000 0000">
 
+          <label for="s-ubicacion">Ubicación / dirección *</label>
+          <input type="text" id="s-ubicacion" autocomplete="street-address" placeholder="Sector, calle, referencia o ciudad">
+
           <label for="s-plan">Plan de interés *</label>
           <select id="s-plan"></select>
 
           <label for="s-nota">Nota (opcional)</label>
-          <textarea id="s-nota" rows="3" placeholder="Cuéntanos cuántos aires tienes, marcas, ubicación, etc."></textarea>
+          <textarea id="s-nota" rows="3" placeholder="Cuántos aires tienes, marcas, horarios preferidos, etc."></textarea>
 
           <p class="form-error" id="solicitud-error" hidden></p>
           <p class="form-ok" id="solicitud-ok" hidden>
-            Solicitud recibida. Te contactaremos pronto para agendar la primera visita.
+            Solicitud lista. Se abrirá WhatsApp para enviarla; también queda guardada en el panel.
           </p>
-          <button type="submit" class="btn btn-block">Enviar solicitud</button>
+          <button type="submit" class="btn btn-block">Enviar por WhatsApp</button>
         </form>
       </div>
     </section>
@@ -795,6 +809,7 @@ const CLAVE_DATOS = "airecare_datos";
 const CLAVE_SOLICITUDES = "airecare_solicitudes";
 const CLAVE_PROYECTOS = "airecare_proyectos";
 const CLAVE_SESION = "airecare_sesion";
+const WHATSAPP_NEGOCIO = "18296372748";
 
 const DATOS_ORIGINALES = {
   empresa: "Almanzar Multiservicios",
@@ -1118,11 +1133,15 @@ function renderSolicitudes() {
   contenedor.innerHTML = solicitudes.map((s) => `
     <div class="admin-fila">
       <div class="admin-fila-info">
-        <strong>${esc(s.nombre)} <span class="chip-chip">· ${esc(s.planNombre)}</span></strong>
-        <span class="admin-fila-detalles">${esc(s.telefono)} · ${formatoFecha(s.fecha)}</span>
+        <strong>${esc(s.nombre)} <span class="chip">· ${esc(s.planNombre)}</span></strong>
+        <span class="admin-fila-detalles">
+          ${esc(s.telefono)} · ${formatoFecha(s.fecha)}
+          ${s.ubicacion ? " · " + esc(s.ubicacion) : ""}
+        </span>
         ${s.nota ? `<p class="lead-nota">“${esc(s.nota)}”</p>` : ""}
       </div>
       <div class="admin-fila-acciones">
+        <a class="btn-mini" href="${esc(enlaceWhatsAppSolicitud(s))}" target="_blank" rel="noopener noreferrer">WhatsApp</a>
         <button type="button" class="btn-mini" data-crear-proyecto="${esc(s.id)}">Crear proyecto</button>
       </div>
     </div>`).join("");
@@ -1372,6 +1391,7 @@ function abrirEditorProyecto(id = null, prefill = null) {
     $("#py-cliente").value = prefill.cliente || "";
     $("#py-telefono").value = prefill.telefono || "";
     if (prefill.planId) $("#py-plan").value = prefill.planId;
+    if (prefill.notas) $("#py-notas").value = prefill.notas;
   }
   $("#modal-proyecto").hidden = false;
   $("#py-cliente").focus();
@@ -1462,6 +1482,24 @@ function borrarProyecto(id) {
 /* ============================================================
    FORMULARIO PÚBLICO DE SOLICITUD
    ============================================================ */
+function mensajeWhatsAppSolicitud({ nombre, telefono, ubicacion, planNombre, nota }) {
+  const lineas = [
+    "Hola, quiero solicitar un plan de mantenimiento.",
+    "",
+    `*Nombre:* ${nombre}`,
+    `*Teléfono:* ${telefono}`,
+    `*Ubicación:* ${ubicacion}`,
+    `*Plan:* ${planNombre}`,
+  ];
+  if (nota) lineas.push(`*Nota:* ${nota}`);
+  return lineas.join("\n");
+}
+
+function enlaceWhatsAppSolicitud(datos) {
+  const texto = mensajeWhatsAppSolicitud(datos);
+  return `https://wa.me/${WHATSAPP_NEGOCIO}?text=${encodeURIComponent(texto)}`;
+}
+
 function manejarEnvioSolicitud(evento) {
   evento.preventDefault();
   const error = $("#solicitud-error");
@@ -1472,6 +1510,7 @@ function manejarEnvioSolicitud(evento) {
   const nombre = $("#s-nombre").value.trim();
   const telefonoCrudo = $("#s-telefono").value.trim();
   const telefonoDigitos = telefonoCrudo.replace(/\D/g, "");
+  const ubicacion = $("#s-ubicacion").value.trim();
   const planId = $("#s-plan").value;
   const nota = $("#s-nota").value.trim();
 
@@ -1487,23 +1526,28 @@ function manejarEnvioSolicitud(evento) {
 
   if (nombre.length < 2) return marcar("#s-nombre", "Escribe tu nombre completo.");
   if (telefonoDigitos.length < 7) return marcar("#s-telefono", "Escribe un teléfono válido (mínimo 7 dígitos).");
+  if (ubicacion.length < 3) return marcar("#s-ubicacion", "Indica tu ubicación o dirección.");
   if (!planId) return marcar("#s-plan", "Selecciona un plan de interés.");
 
   const plan = planPorId(planId);
-  solicitudes.unshift({
+  const planNombre = plan ? plan.nombre : "Aún no lo sé";
+  const solicitud = {
     id: Date.now().toString(36),
     fecha: new Date().toISOString(),
     nombre,
     telefono: telefonoCrudo,
+    ubicacion,
     planId: plan ? plan.id : "",
-    planNombre: plan ? plan.nombre : "Aún no lo sé",
+    planNombre,
     nota,
-  });
+  };
+  solicitudes.unshift(solicitud);
   persistirSolicitudes();
   actualizarContadorSolicitudes();
   evento.target.reset();
   ok.hidden = false;
-  aviso("Solicitud guardada");
+  aviso("Abriendo WhatsApp…");
+  window.open(enlaceWhatsAppSolicitud(solicitud), "_blank", "noopener,noreferrer");
 }
 
 /* ============================================================
@@ -1635,7 +1679,12 @@ function init() {
     if (!boton) return;
     const s = solicitudes.find((item) => item.id === boton.dataset.crearProyecto);
     if (!s) return;
-    abrirEditorProyecto(null, { cliente: s.nombre, telefono: s.telefono, planId: s.planId });
+    abrirEditorProyecto(null, {
+      cliente: s.nombre,
+      telefono: s.telefono,
+      planId: s.planId,
+      notas: [s.ubicacion ? `Ubicación: ${s.ubicacion}` : "", s.nota].filter(Boolean).join("\n"),
+    });
   });
 
   // CRUD de proyectos
