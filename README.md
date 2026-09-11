@@ -32,5 +32,5 @@ El botón **«Restaurar datos originales»** en el admin vuelve a cargar los 5 p
 ## Notas
 
 - Portada y admin leen la **misma fuente de datos**: cualquier cambio en el admin se refleja al instante en la portada.
-- Todos los planes incluyen **3 mantenimientos al año** (regla de negocio; el campo es editable por plan en el admin).
+- Todos los planes son **suscripción mensual** e incluyen **2 o 3 mantenimientos al año según necesidad** (el campo es editable por plan en el admin).
 - El formulario público **no envía email**: guarda la solicitud en localStorage para verla en el admin.

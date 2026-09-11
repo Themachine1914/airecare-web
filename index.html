@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Almanzar Multiservicios — Mantenimiento de aires acondicionados</title>
-<meta name="description" content="Planes de mantenimiento preventivo de aires acondicionados. Tres visitas al año, gas incluido y reparaciones con descuento.">
+<meta name="description" content="Planes de mantenimiento preventivo de aires acondicionados. Suscripción mensual, 2 o 3 visitas al año según necesidad, gas incluido y reparaciones con descuento.">
 <link rel="icon" href="assets/logo-icono.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -477,7 +477,7 @@ textarea { resize: vertical; }
     <!-- Hero -->
     <section class="hero">
       <div class="contenedor">
-        <span class="hero-badge">Mantenimiento preventivo · 3 visitas al año</span>
+        <span class="hero-badge">Suscripción mensual · 2 o 3 visitas al año</span>
         <h1>Aire frío todo el año, <span class="gradiente">sin sorpresas</span></h1>
         <p class="hero-texto">
           El mantenimiento preventivo alarga la vida de tus aires, reduce el consumo eléctrico
@@ -491,7 +491,7 @@ textarea { resize: vertical; }
         <ul class="hero-puntos">
           <li>
             <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.5l4 4 8-9"/></svg>
-            3 visitas al año en todos los planes
+            2 o 3 mantenimientos al año según necesidad
           </li>
           <li>
             <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.5l4 4 8-9"/></svg>
@@ -510,8 +510,8 @@ textarea { resize: vertical; }
       <div class="contenedor">
         <h2 class="titulo-seccion">Planes de mantenimiento</h2>
         <p class="subtitulo-seccion">
-          Todos los planes incluyen <strong>3 mantenimientos al año</strong>. Elige según la
-          cantidad de aires de tu hogar o negocio.
+          Suscripción <strong>mensual</strong> con <strong>2 o 3 mantenimientos al año</strong> según
+          necesidad. Elige según la cantidad de aires de tu hogar o negocio.
         </p>
         <div class="planes-grid" id="planes-grid"></div>
       </div>
@@ -534,7 +534,7 @@ textarea { resize: vertical; }
         <div class="faq-lista">
           <details class="faq-item">
             <summary>¿Cada cuánto tiempo se realiza el mantenimiento?</summary>
-            <p>Cada plan incluye 3 mantenimientos al año, aproximadamente uno cada 4 meses. Al contratar, calendarizamos las visitas contigo y te recordamos antes de cada una.</p>
+            <p>Según necesidad, cada plan contempla 2 o 3 mantenimientos al año. Al contratar, calendarizamos las visitas contigo y te recordamos antes de cada una.</p>
           </details>
           <details class="faq-item">
             <summary>¿Qué incluye cada visita de mantenimiento?</summary>
@@ -546,7 +546,7 @@ textarea { resize: vertical; }
           </details>
           <details class="faq-item">
             <summary>¿Puedo cambiar de plan después?</summary>
-            <p>Sí. Al renovar puedes subir o bajar de plan según tus equipos. Nuestro equipo te orienta para que elijas el que mejor te conviene.</p>
+            <p>Sí. Como es una suscripción mensual, puedes subir o bajar de plan según tus equipos. Nuestro equipo te orienta para que elijas el que mejor te conviene.</p>
           </details>
           <details class="faq-item">
             <summary>¿Cómo solicito el servicio?</summary>
@@ -694,8 +694,8 @@ textarea { resize: vertical; }
       <input type="text" id="f-nombre" placeholder="Ej. Plan Premium">
 
       <div class="grid-2">
-        <label for="f-precio">Precio anual (USD) *</label>
-        <input type="number" id="f-precio" min="0" step="1" placeholder="800">
+        <label for="f-precio">Precio mensual (USD) *</label>
+        <input type="number" id="f-precio" min="0" step="1" placeholder="80">
 
         <label for="f-aires">Aires cubiertos *</label>
         <input type="text" id="f-aires" placeholder="Ej. 4-5 aires">
@@ -703,8 +703,8 @@ textarea { resize: vertical; }
         <label for="f-gas">Libras de gas incluidas / año</label>
         <input type="number" id="f-gas" min="0" step="1" placeholder="0">
 
-        <label for="f-mant">Mantenimientos / año</label>
-        <input type="number" id="f-mant" min="1" step="1" value="3">
+        <label for="f-mant">Mantenimientos / año (2 o 3)</label>
+        <input type="number" id="f-mant" min="2" max="3" step="1" value="3">
 
         <label for="f-tarjeta">Reparación de tarjeta (texto tabla)</label>
         <input type="text" id="f-tarjeta" placeholder="Ej. 50% de descuento · Gratis">
@@ -805,7 +805,7 @@ const DATOS_ORIGINALES = {
       precio: 300,
       aires: "2 aires",
       gasLibras: 0,
-      mantenimientosAno: 3,
+      mantenimientosAno: 2,
       tarjeta: "No incluida",
       desinstalacion: "No incluida",
       destacado: false,
@@ -820,7 +820,7 @@ const DATOS_ORIGINALES = {
       precio: 500,
       aires: "3 aires",
       gasLibras: 2,
-      mantenimientosAno: 3,
+      mantenimientosAno: 2,
       tarjeta: "No incluida",
       desinstalacion: "No incluida",
       destacado: false,
@@ -1009,9 +1009,9 @@ function tarjetaPlan(p) {
     <article class="plan-card${p.destacado ? " destacado" : ""}">
       ${p.destacado ? '<span class="badge-recomendado">Recomendado</span>' : ""}
       <h3>${esc(p.nombre)}</h3>
-      <p class="plan-precio"><span class="precio">${formatoPrecio(p.precio)}</span><span class="periodo">/año</span></p>
+      <p class="plan-precio"><span class="precio">${formatoPrecio(p.precio)}</span><span class="periodo">/mes</span></p>
       <p class="plan-aires">Cubre: ${esc(p.aires)}</p>
-      <span class="plan-visitas">${p.mantenimientosAno} mantenimientos al año</span>
+      <span class="plan-visitas">${p.mantenimientosAno} mantenimientos al año · según necesidad</span>
       <ul class="plan-beneficios">${beneficios}</ul>
       <button type="button" class="btn btn-block" data-elegir="${esc(p.id)}">Elegir este plan</button>
     </article>`;
@@ -1037,13 +1037,13 @@ function renderTabla() {
     ["Libras de gas / año", (p) => (p.gasLibras > 0 ? `${p.gasLibras} lb` : "—")],
     ["Reparación de tarjeta", (p) => esc(p.tarjeta)],
     ["Desinstalación e instalación", (p) => esc(p.desinstalacion)],
-    ["Mantenimientos al año", (p) => `${p.mantenimientosAno} visitas`],
+    ["Mantenimientos al año", (p) => `${p.mantenimientosAno} visitas (según necesidad)`],
   ];
   let html = '<div class="tabla-scroll"><table class="tabla-comparativa"><thead><tr><th class="col-etiqueta"></th>';
   html += datos.planes.map((p) => `
     <th class="${p.destacado ? "col-destacada" : ""}">
       <span class="tc-nombre">${esc(p.nombre)}</span>
-      <span class="tc-precio">${formatoPrecio(p.precio)} <small>/año</small></span>
+      <span class="tc-precio">${formatoPrecio(p.precio)} <small>/mes</small></span>
     </th>`).join("");
   html += "</tr></thead><tbody>";
   filas.forEach(([etiqueta, fn]) => {
@@ -1059,7 +1059,7 @@ function renderSelectPlanes() {
   const select = $("#s-plan");
   const valorActual = select.value;
   let html = '<option value="" disabled selected>Selecciona un plan…</option>';
-  html += datos.planes.map((p) => `<option value="${esc(p.id)}">${esc(p.nombre)} — ${formatoPrecio(p.precio)}/año</option>`).join("");
+  html += datos.planes.map((p) => `<option value="${esc(p.id)}">${esc(p.nombre)} — ${formatoPrecio(p.precio)}/mes</option>`).join("");
   html += '<option value="sin-decidir">Aún no lo sé</option>';
   select.innerHTML = html;
   if (valorActual && [...select.options].some((o) => o.value === valorActual)) {
@@ -1089,7 +1089,7 @@ function renderAdminPlanes() {
       <div class="admin-fila-info">
         <strong>${esc(p.nombre)} ${p.destacado ? '<span class="chip">Recomendado</span>' : ""}</strong>
         <span class="admin-fila-detalles">
-          ${formatoPrecio(p.precio)}/año · ${esc(p.aires)} ·
+          ${formatoPrecio(p.precio)}/mes · ${esc(p.aires)} ·
           ${p.gasLibras > 0 ? p.gasLibras + " lb de gas" : "sin gas"} ·
           ${p.mantenimientosAno} visitas/año · ${p.beneficios.length} beneficios
         </span>
@@ -1301,7 +1301,7 @@ function guardarPlanDesdeForm(evento) {
     precio,
     aires,
     gasLibras: Math.max(0, Number($("#f-gas").value) || 0),
-    mantenimientosAno: Math.max(1, Number($("#f-mant").value) || 3),
+    mantenimientosAno: Math.min(3, Math.max(2, Number($("#f-mant").value) || 3)),
     tarjeta: $("#f-tarjeta").value.trim() || "No incluida",
     desinstalacion: $("#f-desinstalacion").value.trim() || "No incluida",
     beneficios,
