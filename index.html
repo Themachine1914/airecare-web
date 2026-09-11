@@ -3,32 +3,34 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AireCare — Mantenimiento de aires acondicionados</title>
+<title>Almanzar Multiservicios — Mantenimiento de aires acondicionados</title>
 <meta name="description" content="Planes de mantenimiento preventivo de aires acondicionados. Tres visitas al año, gas incluido y reparaciones con descuento.">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ctext y='19' font-size='19'%3E%E2%9D%84%3C/text%3E%3C/svg%3E">
+<link rel="icon" href="assets/logo-icono.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 /* ============================================================
    AireCare — Demo: mantenimiento de aires acondicionados
    Estética HVAC moderna: fondo oscuro, acentos cian / verde hielo
    ============================================================ */
 :root {
-  --fondo: #060b12;
-  --fondo-2: #0a1320;
-  --tarjeta: #0d1826;
-  --tarjeta-2: #101e2f;
-  --borde: rgba(148, 163, 184, 0.14);
-  --borde-fuerte: rgba(34, 211, 238, 0.45);
-  --texto: #e6edf5;
-  --muted: #93a3b8;
-  --acento: #22d3ee;
-  --acento-2: #5eead4;
-  --exito: #34d399;
-  --peligro: #f87171;
-  --sombra: 0 20px 50px rgba(0, 0, 0, 0.45);
-  --radio: 16px;
+  --fondo: #faf6ef;
+  --fondo-2: #f1e9db;
+  --tarjeta: #ffffff;
+  --tarjeta-2: #fffdf9;
+  --borde: rgba(28, 35, 51, 0.11);
+  --borde-fuerte: rgba(0, 176, 232, 0.5);
+  --texto: #1c2333;
+  --muted: #5c6472;
+  --primario: #1870b8;
+  --primario-2: #12548a;
+  --acento: #00b0e8;
+  --acento-2: #0092bd;
+  --exito: #227a55;
+  --peligro: #b23a2e;
+  --sombra: 0 20px 45px rgba(28, 35, 51, 0.09);
+  --radio: 14px;
   --radio-s: 10px;
 }
 
@@ -37,7 +39,7 @@
 html { scroll-behavior: smooth; }
 
 body {
-  font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-family: "Work Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   background: var(--fondo);
   color: var(--texto);
   line-height: 1.6;
@@ -48,16 +50,14 @@ body {
 
 .contenedor { width: min(1120px, 92%); margin-inline: auto; }
 
-h1, h2, h3 { line-height: 1.15; font-weight: 800; letter-spacing: -0.02em; }
+h1, h2, h3 {
+  font-family: "Fraunces", Georgia, serif;
+  line-height: 1.12; font-weight: 600; letter-spacing: -0.01em;
+}
 
 .muted { color: var(--muted); }
 
-.gradiente {
-  background: linear-gradient(90deg, var(--acento), var(--acento-2));
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
+.gradiente { color: var(--primario); }
 
 .seccion { padding: 84px 0; scroll-margin-top: 84px; }
 
@@ -67,69 +67,73 @@ h1, h2, h3 { line-height: 1.15; font-weight: 800; letter-spacing: -0.02em; }
 /* ---------- Botones ---------- */
 .btn {
   display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-  padding: 12px 22px; border-radius: 999px; border: 0; cursor: pointer;
+  padding: 12px 22px; border-radius: 10px; border: 0; cursor: pointer;
   font: inherit; font-weight: 700; font-size: 0.95rem; text-decoration: none;
-  color: #04222b;
-  background: linear-gradient(90deg, var(--acento), var(--acento-2));
-  transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
-  box-shadow: 0 8px 24px rgba(34, 211, 238, 0.22);
+  color: #fff;
+  background: var(--primario);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+  box-shadow: 0 8px 20px rgba(24, 112, 184, 0.24);
 }
-.btn:hover { transform: translateY(-2px); filter: brightness(1.08); box-shadow: 0 12px 30px rgba(34, 211, 238, 0.32); }
+.btn:hover { transform: translateY(-2px); background: var(--primario-2); box-shadow: 0 12px 26px rgba(24, 112, 184, 0.32); }
 .btn:active { transform: translateY(0); }
 
 .btn-secundario {
   display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-  padding: 12px 22px; border-radius: 999px; cursor: pointer;
+  padding: 12px 22px; border-radius: 10px; cursor: pointer;
   font: inherit; font-weight: 600; font-size: 0.95rem; text-decoration: none;
-  color: var(--texto); background: rgba(148, 163, 184, 0.08);
-  border: 1px solid var(--borde);
+  color: var(--texto); background: transparent;
+  border: 1.5px solid var(--primario);
   transition: border-color 0.15s ease, background 0.15s ease, transform 0.15s ease;
 }
-.btn-secundario:hover { border-color: var(--borde-fuerte); background: rgba(34, 211, 238, 0.08); transform: translateY(-2px); }
+.btn-secundario:hover { background: rgba(29, 111, 165, 0.08); transform: translateY(-2px); }
 
 .btn-ghost {
-  padding: 9px 16px; border-radius: 999px; cursor: pointer;
+  padding: 9px 16px; border-radius: 8px; cursor: pointer;
   font: inherit; font-size: 0.88rem; font-weight: 600;
   color: var(--muted); background: transparent; border: 1px solid var(--borde);
   text-decoration: none; transition: color 0.15s ease, border-color 0.15s ease;
 }
-.btn-ghost:hover { color: var(--texto); border-color: var(--borde-fuerte); }
+.btn-ghost:hover { color: var(--texto); border-color: var(--primario); }
 
-.btn-peligro-ghost:hover { color: var(--peligro); border-color: rgba(248, 113, 113, 0.5); }
+.btn-peligro-ghost:hover { color: var(--peligro); border-color: rgba(178, 58, 46, 0.5); }
 
 .btn-block { width: 100%; }
 
 .btn-mini {
   padding: 7px 14px; border-radius: 8px; cursor: pointer;
   font: inherit; font-size: 0.83rem; font-weight: 600;
-  color: var(--acento); background: rgba(34, 211, 238, 0.1);
-  border: 1px solid rgba(34, 211, 238, 0.3); transition: background 0.15s ease;
+  color: var(--primario); background: rgba(29, 111, 165, 0.08);
+  border: 1px solid rgba(29, 111, 165, 0.28); transition: background 0.15s ease;
 }
-.btn-mini:hover { background: rgba(34, 211, 238, 0.2); }
-.btn-mini-peligro { color: var(--peligro); background: rgba(248, 113, 113, 0.08); border-color: rgba(248, 113, 113, 0.3); }
-.btn-mini-peligro:hover { background: rgba(248, 113, 113, 0.18); }
+.btn-mini:hover { background: rgba(29, 111, 165, 0.16); }
+.btn-mini-peligro { color: var(--peligro); background: rgba(178, 58, 46, 0.08); border-color: rgba(178, 58, 46, 0.3); }
+.btn-mini-peligro:hover { background: rgba(178, 58, 46, 0.16); }
 
 /* ---------- Cabecera ---------- */
 .cabecera {
   position: fixed; inset: 0 0 auto 0; z-index: 50;
-  background: rgba(6, 11, 18, 0.78);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+  background: rgba(250, 246, 239, 0.92);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   border-bottom: 1px solid var(--borde);
 }
 .cabecera-inner { display: flex; align-items: center; gap: 24px; height: 68px; }
 
 .marca {
   display: inline-flex; align-items: center; gap: 10px;
-  font-weight: 800; font-size: 1.15rem; color: var(--texto); text-decoration: none;
+  font-family: "Fraunces", Georgia, serif;
+  font-weight: 600; font-size: 1.05rem; color: var(--texto); text-decoration: none;
+}
+.marca-logo {
+  display: block; height: 48px; width: auto;
+  object-fit: contain;
 }
 .marca-icono {
-  display: grid; place-items: center; width: 36px; height: 36px;
-  border-radius: 10px; color: #04222b;
-  background: linear-gradient(135deg, var(--acento), var(--acento-2));
-  box-shadow: 0 4px 16px rgba(34, 211, 238, 0.35);
+  display: block; width: 36px; height: 36px;
+  border-radius: 8px; object-fit: contain;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(24, 112, 184, 0.18);
 }
-.marca-icono svg { width: 22px; height: 22px; }
 
 .nav { display: flex; gap: 22px; margin-left: auto; }
 .nav a {
@@ -150,24 +154,15 @@ h1, h2, h3 { line-height: 1.15; font-weight: 800; letter-spacing: -0.02em; }
   position: relative; overflow: hidden;
   padding: 170px 0 100px;
   background:
-    radial-gradient(700px 340px at 78% -10%, rgba(34, 211, 238, 0.16), transparent 60%),
-    radial-gradient(600px 320px at 8% 20%, rgba(94, 234, 212, 0.1), transparent 60%),
+    radial-gradient(680px 360px at 82% -8%, rgba(29, 111, 165, 0.1), transparent 60%),
+    radial-gradient(560px 300px at 4% 30%, rgba(0, 176, 232, 0.08), transparent 60%),
     var(--fondo);
-}
-.hero::after {
-  content: ""; position: absolute; inset: 0; pointer-events: none;
-  background-image:
-    linear-gradient(rgba(148, 163, 184, 0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(148, 163, 184, 0.05) 1px, transparent 1px);
-  background-size: 44px 44px;
-  mask-image: radial-gradient(700px 400px at 60% 0%, black, transparent 75%);
-  -webkit-mask-image: radial-gradient(700px 400px at 60% 0%, black, transparent 75%);
 }
 .hero-badge {
   display: inline-block; padding: 7px 16px; border-radius: 999px;
-  font-size: 0.8rem; font-weight: 600; letter-spacing: 0.04em;
-  color: var(--acento-2); background: rgba(94, 234, 212, 0.08);
-  border: 1px solid rgba(94, 234, 212, 0.25);
+  font-size: 0.8rem; font-weight: 600; letter-spacing: 0.02em;
+  color: var(--primario); background: rgba(0, 176, 232, 0.1);
+  border: 1px solid rgba(0, 176, 232, 0.3);
   margin-bottom: 22px;
 }
 .hero h1 { font-size: clamp(2.2rem, 5.4vw, 3.7rem); max-width: 780px; }
@@ -176,7 +171,7 @@ h1, h2, h3 { line-height: 1.15; font-weight: 800; letter-spacing: -0.02em; }
 
 .hero-puntos { display: flex; flex-wrap: wrap; gap: 12px 28px; list-style: none; }
 .hero-puntos li { display: flex; align-items: center; gap: 9px; color: var(--muted); font-size: 0.92rem; }
-.hero-puntos svg { width: 17px; height: 17px; color: var(--acento-2); flex: none; }
+.hero-puntos svg { width: 17px; height: 17px; color: var(--primario); flex: none; }
 
 /* ---------- Tarjetas de planes ---------- */
 .planes-grid {
@@ -188,24 +183,24 @@ h1, h2, h3 { line-height: 1.15; font-weight: 800; letter-spacing: -0.02em; }
 .plan-card {
   position: relative; display: flex; flex-direction: column;
   padding: 30px 26px; border-radius: var(--radio);
-  background: linear-gradient(160deg, var(--tarjeta-2), var(--tarjeta));
+  background: var(--tarjeta);
   border: 1px solid var(--borde);
   transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
 }
-.plan-card:hover { transform: translateY(-5px); border-color: rgba(34, 211, 238, 0.35); box-shadow: var(--sombra); }
+.plan-card:hover { transform: translateY(-5px); border-color: rgba(29, 111, 165, 0.3); box-shadow: var(--sombra); }
 
 .plan-card.destacado {
   border-color: var(--borde-fuerte);
-  box-shadow: 0 0 0 1px rgba(34, 211, 238, 0.25), 0 18px 48px rgba(34, 211, 238, 0.14);
+  box-shadow: 0 0 0 1px rgba(0, 176, 232, 0.22), 0 18px 40px rgba(0, 176, 232, 0.14);
 }
-.plan-card.destacado:hover { box-shadow: 0 0 0 1px rgba(34, 211, 238, 0.4), 0 24px 56px rgba(34, 211, 238, 0.2); }
+.plan-card.destacado:hover { box-shadow: 0 0 0 1px rgba(0, 176, 232, 0.32), 0 22px 48px rgba(0, 176, 232, 0.18); }
 
 .badge-recomendado {
   position: absolute; top: -13px; left: 50%; transform: translateX(-50%);
   padding: 5px 14px; border-radius: 999px; white-space: nowrap;
   font-size: 0.72rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
-  color: #04222b; background: linear-gradient(90deg, var(--acento), var(--acento-2));
-  box-shadow: 0 6px 18px rgba(34, 211, 238, 0.4);
+  color: #fff; background: var(--primario);
+  box-shadow: 0 6px 16px rgba(24, 112, 184, 0.35);
 }
 
 .plan-card h3 { font-size: 1.18rem; margin-bottom: 12px; }
@@ -218,12 +213,12 @@ h1, h2, h3 { line-height: 1.15; font-weight: 800; letter-spacing: -0.02em; }
 .plan-visitas {
   display: inline-flex; width: fit-content; margin: 8px 0 16px;
   padding: 4px 12px; border-radius: 999px; font-size: 0.8rem; font-weight: 600;
-  color: var(--acento); background: rgba(34, 211, 238, 0.08); border: 1px solid rgba(34, 211, 238, 0.22);
+  color: var(--primario); background: rgba(29, 111, 165, 0.08); border: 1px solid rgba(29, 111, 165, 0.22);
 }
 
 .plan-beneficios { list-style: none; display: grid; gap: 10px; margin-bottom: 24px; flex: 1; }
 .plan-beneficios li { display: flex; gap: 10px; font-size: 0.9rem; color: var(--muted); }
-.plan-beneficios svg { width: 17px; height: 17px; color: var(--acento-2); flex: none; margin-top: 2px; }
+.plan-beneficios svg { width: 17px; height: 17px; color: var(--primario); flex: none; margin-top: 2px; }
 
 .planes-vacio {
   padding: 40px; border: 1px dashed var(--borde); border-radius: var(--radio);
@@ -239,15 +234,15 @@ h1, h2, h3 { line-height: 1.15; font-weight: 800; letter-spacing: -0.02em; }
 .tabla-comparativa tbody tr:last-child th, .tabla-comparativa tbody tr:last-child td { border-bottom: 0; }
 
 .tc-nombre { display: block; font-weight: 700; }
-.tc-precio { display: block; color: var(--acento); font-weight: 800; font-size: 1.05rem; margin-top: 2px; }
+.tc-precio { display: block; color: var(--primario); font-weight: 800; font-size: 1.05rem; margin-top: 2px; }
 .tc-precio small { color: var(--muted); font-weight: 500; }
 
 .tabla-comparativa .col-etiqueta {
   text-align: left; color: var(--muted); font-weight: 600; font-size: 0.85rem;
-  background: rgba(148, 163, 184, 0.04); min-width: 190px;
+  background: rgba(28, 35, 51, 0.03); min-width: 190px;
 }
 .tabla-comparativa td { color: var(--texto); }
-.tabla-comparativa .col-destacada { background: rgba(34, 211, 238, 0.07); box-shadow: inset 0 1px 0 rgba(34, 211, 238, 0.12), inset 0 -1px 0 rgba(34, 211, 238, 0.12); }
+.tabla-comparativa .col-destacada { background: rgba(0, 176, 232, 0.07); box-shadow: inset 0 1px 0 rgba(0, 176, 232, 0.16), inset 0 -1px 0 rgba(0, 176, 232, 0.16); }
 .tabla-comparativa thead .col-destacada { border-radius: 12px 12px 0 0; }
 
 /* ---------- FAQ ---------- */
@@ -256,14 +251,14 @@ h1, h2, h3 { line-height: 1.15; font-weight: 800; letter-spacing: -0.02em; }
   border: 1px solid var(--borde); border-radius: var(--radio-s);
   background: var(--tarjeta); overflow: hidden; transition: border-color 0.15s ease;
 }
-.faq-item[open] { border-color: rgba(34, 211, 238, 0.3); }
+.faq-item[open] { border-color: rgba(29, 111, 165, 0.3); }
 .faq-item summary {
   cursor: pointer; list-style: none; padding: 18px 22px;
   font-weight: 600; display: flex; justify-content: space-between; align-items: center; gap: 16px;
 }
 .faq-item summary::-webkit-details-marker { display: none; }
 .faq-item summary::after {
-  content: "+"; color: var(--acento); font-size: 1.3rem; font-weight: 400; flex: none;
+  content: "+"; color: var(--primario); font-size: 1.3rem; font-weight: 400; flex: none;
   transition: transform 0.15s ease;
 }
 .faq-item[open] summary::after { transform: rotate(45deg); }
@@ -276,22 +271,23 @@ h1, h2, h3 { line-height: 1.15; font-weight: 800; letter-spacing: -0.02em; }
 
 .form-card {
   padding: 32px; border-radius: var(--radio);
-  background: linear-gradient(160deg, var(--tarjeta-2), var(--tarjeta));
+  background: var(--tarjeta);
   border: 1px solid var(--borde);
+  box-shadow: var(--sombra);
   transition: box-shadow 0.3s ease, border-color 0.3s ease;
 }
-.form-card.pulso { border-color: var(--borde-fuerte); box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.18); }
+.form-card.pulso { border-color: var(--borde-fuerte); box-shadow: 0 0 0 3px rgba(0, 176, 232, 0.18); }
 .form-card h3 { margin-bottom: 20px; font-size: 1.15rem; }
 
 label { display: block; font-size: 0.86rem; font-weight: 600; margin-bottom: 14px; color: var(--texto); }
 input, select, textarea {
   width: 100%; margin-top: 6px; padding: 11px 14px;
   font: inherit; font-size: 0.95rem; color: var(--texto);
-  background: rgba(6, 11, 18, 0.6); border: 1px solid var(--borde); border-radius: var(--radio-s);
+  background: #fbf9f4; border: 1px solid var(--borde); border-radius: var(--radio-s);
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 input:focus, select:focus, textarea:focus {
-  outline: none; border-color: var(--acento); box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.15);
+  outline: none; border-color: var(--primario); box-shadow: 0 0 0 3px rgba(29, 111, 165, 0.14);
 }
 input.invalido, select.invalido, textarea.invalido { border-color: var(--peligro); }
 textarea { resize: vertical; }
@@ -299,14 +295,14 @@ textarea { resize: vertical; }
 .form-error { color: var(--peligro); font-size: 0.86rem; margin: 4px 0 12px; }
 .form-ok {
   padding: 12px 16px; border-radius: var(--radio-s); font-size: 0.9rem; margin-bottom: 14px;
-  color: var(--exito); background: rgba(52, 211, 153, 0.08); border: 1px solid rgba(52, 211, 153, 0.3);
+  color: var(--exito); background: rgba(34, 122, 85, 0.08); border: 1px solid rgba(34, 122, 85, 0.3);
 }
 
 /* ---------- Pie ---------- */
 .pie { border-top: 1px solid var(--borde); padding: 34px 0; background: var(--fondo-2); }
 .pie-inner { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; justify-content: space-between; color: var(--muted); font-size: 0.88rem; }
 .pie a { color: var(--muted); text-decoration: none; }
-.pie a:hover { color: var(--acento); }
+.pie a:hover { color: var(--primario); }
 
 /* ---------- Administración ---------- */
 .admin-main { padding: 110px 0 70px; }
@@ -318,10 +314,10 @@ textarea { resize: vertical; }
 .login-caja h2 { margin-bottom: 8px; }
 .credenciales {
   margin: 14px 0 22px; padding: 12px 16px; border-radius: var(--radio-s);
-  background: rgba(34, 211, 238, 0.06); border: 1px dashed rgba(34, 211, 238, 0.35);
+  background: rgba(29, 111, 165, 0.06); border: 1px dashed rgba(29, 111, 165, 0.35);
   font-size: 0.9rem; color: var(--texto);
 }
-.credenciales code { color: var(--acento); font-weight: 700; }
+.credenciales code { color: var(--primario); font-weight: 700; }
 
 .admin-tabs { display: flex; gap: 8px; margin-bottom: 28px; border-bottom: 1px solid var(--borde); }
 .admin-tab {
@@ -330,13 +326,13 @@ textarea { resize: vertical; }
   border-bottom: 2px solid transparent; margin-bottom: -1px; transition: color 0.15s ease;
 }
 .admin-tab:hover { color: var(--texto); }
-.admin-tab.activa { color: var(--acento); border-bottom-color: var(--acento); }
+.admin-tab.activa { color: var(--primario); border-bottom-color: var(--primario); }
 
 .contador {
   display: inline-grid; place-items: center; min-width: 22px; height: 22px;
   padding: 0 6px; margin-left: 6px; border-radius: 999px;
-  font-size: 0.75rem; font-weight: 700; color: #04222b;
-  background: linear-gradient(90deg, var(--acento), var(--acento-2));
+  font-size: 0.75rem; font-weight: 700; color: #fff;
+  background: var(--primario);
 }
 
 .admin-barra {
@@ -355,7 +351,7 @@ textarea { resize: vertical; }
   padding: 16px 20px; border: 1px solid var(--borde); border-radius: var(--radio-s); background: var(--tarjeta);
   transition: border-color 0.15s ease;
 }
-.admin-fila:hover { border-color: rgba(34, 211, 238, 0.28); }
+.admin-fila:hover { border-color: rgba(29, 111, 165, 0.28); }
 .admin-fila-info { display: grid; gap: 3px; }
 .admin-fila-detalles { color: var(--muted); font-size: 0.85rem; }
 .admin-fila-acciones { display: flex; gap: 8px; }
@@ -363,38 +359,59 @@ textarea { resize: vertical; }
 .chip {
   display: inline-block; width: fit-content; padding: 2px 10px; border-radius: 999px;
   font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;
-  color: var(--acento-2); background: rgba(94, 234, 212, 0.1); border: 1px solid rgba(94, 234, 212, 0.3);
+  color: var(--primario); background: rgba(0, 176, 232, 0.1); border: 1px solid rgba(0, 176, 232, 0.3);
 }
 .chip-chip { color: var(--muted); font-size: 0.85rem; }
 .lead-nota { color: var(--muted); font-size: 0.88rem; font-style: italic; margin-top: 4px; }
 .vacio { color: var(--muted); padding: 26px; text-align: center; border: 1px dashed var(--borde); border-radius: var(--radio-s); }
 
+/* ---------- Proyectos (cotizaciones) ---------- */
+.chip-abierto { color: var(--primario); background: rgba(29, 111, 165, 0.1); border: 1px solid rgba(29, 111, 165, 0.3); }
+.chip-cerrado { color: var(--muted); background: rgba(28, 35, 51, 0.06); border: 1px solid var(--borde); }
+
+.proyecto-costos { display: flex; flex-wrap: wrap; gap: 4px 16px; margin-top: 2px; }
+.proyecto-costos span { white-space: nowrap; }
+.proyecto-utilidad { font-weight: 700; color: var(--exito); }
+.proyecto-utilidad.negativa { color: var(--peligro); }
+
+.recordatorio {
+  display: inline-flex; align-items: center; gap: 6px; margin-top: 6px;
+  padding: 3px 10px; border-radius: 999px; font-size: 0.78rem; font-weight: 600;
+  color: var(--primario); background: rgba(29, 111, 165, 0.08); border: 1px solid rgba(29, 111, 165, 0.22);
+  width: fit-content;
+}
+.admin-fila.recordatorio-vencido { border-color: rgba(178, 58, 46, 0.4); background: rgba(178, 58, 46, 0.04); }
+.recordatorio-vencido .recordatorio {
+  color: var(--peligro); background: rgba(178, 58, 46, 0.09); border-color: rgba(178, 58, 46, 0.3);
+}
+.contador-alerta { background: var(--peligro); }
+
 /* ---------- Modal editor de plan ---------- */
 .modal-fondo {
   position: fixed; inset: 0; z-index: 100; display: grid; place-items: center;
-  background: rgba(3, 6, 10, 0.7); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+  background: rgba(28, 35, 51, 0.55); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
   padding: 20px; overflow-y: auto;
 }
 .modal {
   width: min(620px, 100%); max-height: 92vh; overflow-y: auto;
   padding: 30px; border-radius: var(--radio);
-  background: var(--tarjeta-2); border: 1px solid var(--borde); box-shadow: var(--sombra);
+  background: var(--tarjeta); border: 1px solid var(--borde); box-shadow: var(--sombra);
 }
 .modal h3 { margin-bottom: 20px; }
 .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0 16px; }
 .check-linea { display: flex; align-items: center; gap: 10px; font-size: 0.9rem; }
-.check-linea input { width: auto; margin: 0; accent-color: var(--acento); }
+.check-linea input { width: auto; margin: 0; accent-color: var(--primario); }
 .modal-acciones { display: flex; justify-content: flex-end; gap: 10px; margin-top: 8px; }
 
 /* ---------- Avisos (toast) ---------- */
 .avisos { position: fixed; right: 20px; bottom: 20px; z-index: 200; display: grid; gap: 10px; }
 .aviso {
   padding: 13px 20px; border-radius: var(--radio-s); font-size: 0.9rem; font-weight: 600;
-  background: var(--tarjeta-2); border: 1px solid rgba(52, 211, 153, 0.4); color: var(--exito);
+  background: var(--tarjeta); border: 1px solid rgba(34, 122, 85, 0.4); color: var(--exito);
   box-shadow: var(--sombra); opacity: 0; transform: translateY(8px); transition: all 0.25s ease;
 }
 .aviso.visible { opacity: 1; transform: translateY(0); }
-.aviso-error { border-color: rgba(248, 113, 113, 0.4); color: var(--peligro); }
+.aviso-error { border-color: rgba(178, 58, 46, 0.4); color: var(--peligro); }
 
 /* ---------- Responsive ---------- */
 @media (max-width: 860px) {
@@ -411,6 +428,7 @@ textarea { resize: vertical; }
   .cabecera-acciones { margin-left: auto; }
   .nav + .cabecera-acciones { margin-left: 0; }
   .cabecera-inner { gap: 12px; }
+  .marca-logo { height: 42px; }
   .seccion-solicitud { grid-template-columns: 1fr; gap: 30px; }
   .hero { padding: 140px 0 70px; }
 }
@@ -435,15 +453,8 @@ textarea { resize: vertical; }
 
   <header class="cabecera">
     <div class="contenedor cabecera-inner">
-      <a class="marca" href="#/">
-        <span class="marca-icono" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 2v20"/><path d="M12 2l-2.5 2.5M12 2l2.5 2.5M12 22l-2.5-2.5M12 22l2.5-2.5"/>
-            <path d="M3.5 7l17 10"/><path d="M3.5 7l.8 3.4M3.5 7l3.4-.8M20.5 17l-.8-3.4M20.5 17l-3.4.8"/>
-            <path d="M3.5 17L20.5 7"/><path d="M3.5 17l3.4.8M3.5 17l.8-3.4M20.5 7l-3.4-.8M20.5 7l-.8 3.4"/>
-          </svg>
-        </span>
-        <span class="js-marca">AireCare</span>
+      <a class="marca" href="#/" aria-label="Almanzar Multiservicios">
+        <img class="marca-logo" src="assets/logo-almanzar.png" alt="Almanzar Multiservicios" width="180" height="48">
       </a>
       <nav class="nav" id="nav-principal">
         <a href="#planes">Planes</a>
@@ -580,7 +591,7 @@ textarea { resize: vertical; }
 
   <footer class="pie">
     <div class="contenedor pie-inner">
-      <span>© <span id="anio-actual"></span> <span class="js-marca">AireCare</span> — Mantenimiento de aires acondicionados</span>
+      <span>© <span id="anio-actual"></span> <span class="js-marca">Almanzar Multiservicios</span> — Mantenimiento de aires acondicionados</span>
       <a href="#/admin">Acceso admin</a>
     </div>
   </footer>
@@ -592,14 +603,8 @@ textarea { resize: vertical; }
   <header class="cabecera">
     <div class="contenedor cabecera-inner">
       <span class="marca">
-        <span class="marca-icono" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 2v20"/><path d="M12 2l-2.5 2.5M12 2l2.5 2.5M12 22l-2.5-2.5M12 22l2.5-2.5"/>
-            <path d="M3.5 7l17 10"/><path d="M3.5 7l.8 3.4M3.5 7l3.4-.8M20.5 17l-.8-3.4M20.5 17l-3.4.8"/>
-            <path d="M3.5 17L20.5 7"/><path d="M3.5 17l3.4.8M3.5 17l.8-3.4M20.5 7l-3.4-.8M20.5 7l-.8 3.4"/>
-          </svg>
-        </span>
-        Panel · <span class="js-marca">AireCare</span>
+        <img class="marca-icono" src="assets/logo-icono.png" alt="" width="36" height="36">
+        Panel · <span class="js-marca">Almanzar Multiservicios</span>
       </span>
       <div class="cabecera-acciones">
         <a class="btn-ghost" href="#/">Ver portada</a>
@@ -634,6 +639,9 @@ textarea { resize: vertical; }
         <button type="button" class="admin-tab" data-tab="solicitudes">
           Solicitudes <span class="contador" id="contador-solicitudes">0</span>
         </button>
+        <button type="button" class="admin-tab" data-tab="proyectos">
+          Proyectos <span class="contador contador-alerta" id="contador-recordatorios" hidden>0</span>
+        </button>
       </div>
 
       <!-- Pestaña: planes -->
@@ -661,6 +669,15 @@ textarea { resize: vertical; }
           <button type="button" class="btn-ghost btn-peligro-ghost" id="btn-vaciar-solicitudes">Vaciar solicitudes</button>
         </div>
         <div id="admin-solicitudes-lista" class="admin-lista"></div>
+      </div>
+
+      <!-- Pestaña: proyectos -->
+      <div id="panel-proyectos" class="admin-panel-seccion" hidden>
+        <div class="admin-barra">
+          <p class="muted">Cotiza, abre y cierra proyectos de clientes. Registra precio de venta, costos y recordatorios de seguimiento.</p>
+          <button type="button" class="btn" id="btn-nuevo-proyecto">+ Nuevo proyecto</button>
+        </div>
+        <div id="admin-proyectos-lista" class="admin-lista"></div>
       </div>
     </section>
   </main>
@@ -714,6 +731,54 @@ textarea { resize: vertical; }
   </div>
 </div>
 
+<!-- ==================== MODAL: EDITOR DE PROYECTO ==================== -->
+<div class="modal-fondo" id="modal-proyecto" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-proyecto-titulo">
+    <h3 id="modal-proyecto-titulo">Nuevo proyecto</h3>
+    <form id="form-proyecto" novalidate>
+      <input type="hidden" id="py-id">
+
+      <label for="py-cliente">Cliente *</label>
+      <input type="text" id="py-cliente" placeholder="Nombre del cliente">
+
+      <div class="grid-2">
+        <label for="py-telefono">Teléfono / WhatsApp</label>
+        <input type="tel" id="py-telefono" placeholder="Ej. 809 000 0000">
+
+        <label for="py-plan">Plan activado</label>
+        <select id="py-plan">
+          <option value="">Aún no decidido</option>
+        </select>
+
+        <label for="py-precio-venta">Precio de venta (USD)</label>
+        <input type="number" id="py-precio-venta" min="0" step="1" placeholder="800">
+
+        <label for="py-costo-materiales">Costo de materiales (USD)</label>
+        <input type="number" id="py-costo-materiales" min="0" step="1" placeholder="200">
+
+        <label for="py-costo-mano-obra">Costo de mano de obra (USD, opcional)</label>
+        <input type="number" id="py-costo-mano-obra" min="0" step="1" placeholder="0">
+
+        <label for="py-recordatorio-fecha">Fecha de recordatorio</label>
+        <input type="date" id="py-recordatorio-fecha">
+      </div>
+
+      <label for="py-recordatorio-nota">Nota del recordatorio (opcional)</label>
+      <textarea id="py-recordatorio-nota" rows="2" placeholder="Ej. Llamar para confirmar próxima visita"></textarea>
+
+      <label for="py-notas">Notas del proyecto (opcional)</label>
+      <textarea id="py-notas" rows="3" placeholder="Detalles del trabajo, ubicación, equipos, etc."></textarea>
+
+      <p class="form-error" id="proyecto-error" hidden></p>
+
+      <div class="modal-acciones">
+        <button type="button" class="btn-ghost" id="btn-cancelar-proyecto">Cancelar</button>
+        <button type="submit" class="btn">Guardar proyecto</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 <div class="avisos" id="avisos" aria-live="polite"></div>
 
 <script>
@@ -728,10 +793,11 @@ textarea { resize: vertical; }
 /* ---------- Constantes ---------- */
 const CLAVE_DATOS = "airecare_datos";
 const CLAVE_SOLICITUDES = "airecare_solicitudes";
+const CLAVE_PROYECTOS = "airecare_proyectos";
 const CLAVE_SESION = "airecare_sesion";
 
 const DATOS_ORIGINALES = {
-  empresa: "AireCare",
+  empresa: "Almanzar Multiservicios",
   planes: [
     {
       id: "basico",
@@ -836,10 +902,12 @@ function cargarJSON(clave, valorPorDefecto) {
 
 let datos = cargarJSON(CLAVE_DATOS, DATOS_ORIGINALES);
 let solicitudes = cargarJSON(CLAVE_SOLICITUDES, []);
+let proyectos = cargarJSON(CLAVE_PROYECTOS, []);
 
 // Respaldo por si los datos guardados están incompletos o corruptos
 if (!datos || !Array.isArray(datos.planes)) datos = clonar(DATOS_ORIGINALES);
 if (!Array.isArray(solicitudes)) solicitudes = [];
+if (!Array.isArray(proyectos)) proyectos = [];
 
 /* ---------- Utilidades ---------- */
 const $ = (selector, base = document) => base.querySelector(selector);
@@ -866,6 +934,20 @@ function formatoFecha(iso) {
   }
 }
 
+function formatoFechaSolo(fechaISO) {
+  try {
+    return new Date(fechaISO + "T00:00:00").toLocaleDateString("es-ES", { dateStyle: "medium" });
+  } catch {
+    return fechaISO;
+  }
+}
+
+function hoyISO() {
+  const ahora = new Date();
+  const local = new Date(ahora.getTime() - ahora.getTimezoneOffset() * 60000);
+  return local.toISOString().slice(0, 10);
+}
+
 function persistirDatos() {
   localStorage.setItem(CLAVE_DATOS, JSON.stringify(datos));
 }
@@ -874,8 +956,16 @@ function persistirSolicitudes() {
   localStorage.setItem(CLAVE_SOLICITUDES, JSON.stringify(solicitudes));
 }
 
+function persistirProyectos() {
+  localStorage.setItem(CLAVE_PROYECTOS, JSON.stringify(proyectos));
+}
+
 function planPorId(id) {
   return datos.planes.find((p) => p.id === id);
+}
+
+function proyectoPorId(id) {
+  return proyectos.find((p) => p.id === id);
 }
 
 function slugificar(texto) {
@@ -1032,13 +1122,89 @@ function renderSolicitudes() {
         <span class="admin-fila-detalles">${esc(s.telefono)} · ${formatoFecha(s.fecha)}</span>
         ${s.nota ? `<p class="lead-nota">“${esc(s.nota)}”</p>` : ""}
       </div>
+      <div class="admin-fila-acciones">
+        <button type="button" class="btn-mini" data-crear-proyecto="${esc(s.id)}">Crear proyecto</button>
+      </div>
     </div>`).join("");
+}
+
+/* ============================================================
+   RENDERIZADO — PROYECTOS (COTIZACIONES)
+   ============================================================ */
+function nombrePlanProyecto(p) {
+  if (!p.planId) return "Sin plan asignado";
+  const plan = planPorId(p.planId);
+  return plan ? plan.nombre : "Plan eliminado";
+}
+
+function recordatorioVencido(p) {
+  return p.estado === "abierto" && !!p.recordatorioFecha && p.recordatorioFecha <= hoyISO();
+}
+
+function actualizarContadorRecordatorios() {
+  const pendientes = proyectos.filter(recordatorioVencido).length;
+  const el = $("#contador-recordatorios");
+  el.textContent = pendientes;
+  el.hidden = pendientes === 0;
+}
+
+function filaProyecto(p) {
+  const utilidad = Number(p.precioVenta || 0) - Number(p.costoMateriales || 0) - Number(p.costoManoObra || 0);
+  const vencido = recordatorioVencido(p);
+  return `
+    <div class="admin-fila${vencido ? " recordatorio-vencido" : ""}">
+      <div class="admin-fila-info">
+        <strong>
+          ${esc(p.cliente)}
+          <span class="chip ${p.estado === "abierto" ? "chip-abierto" : "chip-cerrado"}">${p.estado === "abierto" ? "Abierto" : "Cerrado"}</span>
+        </strong>
+        <span class="admin-fila-detalles">
+          ${p.telefono ? esc(p.telefono) + " · " : ""}${esc(nombrePlanProyecto(p))} · creado ${formatoFecha(p.fechaCreacion)}
+          ${p.estado === "cerrado" && p.fechaCierre ? " · cerrado " + formatoFecha(p.fechaCierre) : ""}
+        </span>
+        <div class="proyecto-costos admin-fila-detalles">
+          <span>Venta: ${formatoPrecio(p.precioVenta)}</span>
+          <span>Materiales: ${formatoPrecio(p.costoMateriales)}</span>
+          ${p.costoManoObra ? `<span>Mano de obra: ${formatoPrecio(p.costoManoObra)}</span>` : ""}
+          <span class="proyecto-utilidad${utilidad < 0 ? " negativa" : ""}">Utilidad: ${formatoPrecio(utilidad)}</span>
+        </div>
+        ${p.recordatorioFecha ? `
+          <span class="recordatorio">
+            🔔 ${formatoFechaSolo(p.recordatorioFecha)}${p.recordatorioNota ? " — " + esc(p.recordatorioNota) : ""}
+          </span>` : ""}
+        ${p.notas ? `<p class="lead-nota">“${esc(p.notas)}”</p>` : ""}
+      </div>
+      <div class="admin-fila-acciones">
+        <button type="button" class="btn-mini" data-editar-proyecto="${esc(p.id)}">Editar</button>
+        ${p.estado === "abierto"
+          ? `<button type="button" class="btn-mini" data-cerrar-proyecto="${esc(p.id)}">Cerrar proyecto</button>`
+          : `<button type="button" class="btn-mini" data-reabrir-proyecto="${esc(p.id)}">Reabrir</button>`}
+        <button type="button" class="btn-mini btn-mini-peligro" data-borrar-proyecto="${esc(p.id)}">Borrar</button>
+      </div>
+    </div>`;
+}
+
+function renderAdminProyectos() {
+  actualizarContadorRecordatorios();
+  const contenedor = $("#admin-proyectos-lista");
+  if (!proyectos.length) {
+    contenedor.innerHTML = '<p class="vacio">Aún no hay proyectos. Crea uno con «Nuevo proyecto» o desde una solicitud.</p>';
+    return;
+  }
+  const ordenados = [...proyectos].sort((a, b) => {
+    const va = recordatorioVencido(a) ? 0 : a.estado === "abierto" ? 1 : 2;
+    const vb = recordatorioVencido(b) ? 0 : b.estado === "abierto" ? 1 : 2;
+    if (va !== vb) return va - vb;
+    return b.fechaCreacion.localeCompare(a.fechaCreacion);
+  });
+  contenedor.innerHTML = ordenados.map(filaProyecto).join("");
 }
 
 function guardarCambiosDatos() {
   persistirDatos();
   renderPublico();
   renderAdminPlanes();
+  renderAdminProyectos();
 }
 
 /* ============================================================
@@ -1071,6 +1237,7 @@ function mostrarSegunSesion() {
   if (logueado) {
     renderAdminPlanes();
     renderSolicitudes();
+    renderAdminProyectos();
   }
 }
 
@@ -1163,6 +1330,133 @@ function borrarPlan(id) {
   datos.planes = datos.planes.filter((item) => item.id !== id);
   guardarCambiosDatos();
   aviso("Plan eliminado");
+}
+
+/* ============================================================
+   EDITOR DE PROYECTOS (modal) — cotización, apertura y cierre
+   ============================================================ */
+function renderSelectPlanesProyecto() {
+  const select = $("#py-plan");
+  const valorActual = select.value;
+  let html = '<option value="">Aún no decidido</option>';
+  html += datos.planes.map((p) => `<option value="${esc(p.id)}">${esc(p.nombre)}</option>`).join("");
+  select.innerHTML = html;
+  if (valorActual && [...select.options].some((o) => o.value === valorActual)) {
+    select.value = valorActual;
+  }
+}
+
+function abrirEditorProyecto(id = null, prefill = null) {
+  const form = $("#form-proyecto");
+  form.reset();
+  $("#proyecto-error").hidden = true;
+  $("#py-id").value = "";
+  $("#modal-proyecto-titulo").textContent = "Nuevo proyecto";
+  renderSelectPlanesProyecto();
+
+  if (id) {
+    const p = proyectoPorId(id);
+    if (!p) return;
+    $("#modal-proyecto-titulo").textContent = `Editar: ${p.cliente}`;
+    $("#py-id").value = p.id;
+    $("#py-cliente").value = p.cliente;
+    $("#py-telefono").value = p.telefono || "";
+    $("#py-plan").value = p.planId || "";
+    $("#py-precio-venta").value = p.precioVenta ?? "";
+    $("#py-costo-materiales").value = p.costoMateriales ?? "";
+    $("#py-costo-mano-obra").value = p.costoManoObra ?? "";
+    $("#py-recordatorio-fecha").value = p.recordatorioFecha || "";
+    $("#py-recordatorio-nota").value = p.recordatorioNota || "";
+    $("#py-notas").value = p.notas || "";
+  } else if (prefill) {
+    $("#py-cliente").value = prefill.cliente || "";
+    $("#py-telefono").value = prefill.telefono || "";
+    if (prefill.planId) $("#py-plan").value = prefill.planId;
+  }
+  $("#modal-proyecto").hidden = false;
+  $("#py-cliente").focus();
+}
+
+function cerrarEditorProyecto() {
+  $("#modal-proyecto").hidden = true;
+}
+
+function errorEditorProyecto(mensaje) {
+  const el = $("#proyecto-error");
+  el.textContent = mensaje;
+  el.hidden = false;
+}
+
+function guardarProyectoDesdeForm(evento) {
+  evento.preventDefault();
+  const idEdicion = $("#py-id").value;
+  const cliente = $("#py-cliente").value.trim();
+  const telefono = $("#py-telefono").value.trim();
+  const planId = $("#py-plan").value;
+  const precioVenta = Number($("#py-precio-venta").value || 0);
+  const costoMateriales = Number($("#py-costo-materiales").value || 0);
+  const costoManoObra = Number($("#py-costo-mano-obra").value || 0);
+  const recordatorioFecha = $("#py-recordatorio-fecha").value;
+  const recordatorioNota = $("#py-recordatorio-nota").value.trim();
+  const notas = $("#py-notas").value.trim();
+
+  if (cliente.length < 2) return errorEditorProyecto("Escribe el nombre del cliente.");
+  if (precioVenta < 0 || costoMateriales < 0 || costoManoObra < 0) {
+    return errorEditorProyecto("Los montos no pueden ser negativos.");
+  }
+
+  if (idEdicion) {
+    const proyecto = proyectoPorId(idEdicion);
+    if (!proyecto) return;
+    Object.assign(proyecto, {
+      cliente, telefono, planId, precioVenta, costoMateriales, costoManoObra,
+      recordatorioFecha, recordatorioNota, notas,
+    });
+  } else {
+    proyectos.unshift({
+      id: Date.now().toString(36),
+      cliente, telefono, planId, precioVenta, costoMateriales, costoManoObra,
+      recordatorioFecha, recordatorioNota, notas,
+      estado: "abierto",
+      fechaCreacion: new Date().toISOString(),
+      fechaCierre: "",
+    });
+  }
+
+  persistirProyectos();
+  renderAdminProyectos();
+  cerrarEditorProyecto();
+  aviso(idEdicion ? "Proyecto actualizado" : "Proyecto creado");
+}
+
+function cerrarProyecto(id) {
+  const p = proyectoPorId(id);
+  if (!p) return;
+  p.estado = "cerrado";
+  p.fechaCierre = new Date().toISOString();
+  persistirProyectos();
+  renderAdminProyectos();
+  aviso("Proyecto cerrado");
+}
+
+function reabrirProyecto(id) {
+  const p = proyectoPorId(id);
+  if (!p) return;
+  p.estado = "abierto";
+  p.fechaCierre = "";
+  persistirProyectos();
+  renderAdminProyectos();
+  aviso("Proyecto reabierto");
+}
+
+function borrarProyecto(id) {
+  const p = proyectoPorId(id);
+  if (!p) return;
+  if (!confirm(`¿Eliminar el proyecto de «${p.cliente}»? Esta acción no se puede deshacer.`)) return;
+  proyectos = proyectos.filter((item) => item.id !== id);
+  persistirProyectos();
+  renderAdminProyectos();
+  aviso("Proyecto eliminado");
 }
 
 /* ============================================================
@@ -1282,6 +1576,7 @@ function init() {
       $$(".admin-tab").forEach((b) => b.classList.toggle("activa", b === boton));
       $("#panel-planes").hidden = boton.dataset.tab !== "planes";
       $("#panel-solicitudes").hidden = boton.dataset.tab !== "solicitudes";
+      $("#panel-proyectos").hidden = boton.dataset.tab !== "proyectos";
     });
   });
 
@@ -1313,6 +1608,7 @@ function init() {
   });
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape" && !$("#modal-plan").hidden) cerrarEditorPlan();
+    if (e.key === "Escape" && !$("#modal-proyecto").hidden) cerrarEditorProyecto();
   });
 
   // Restaurar datos originales
@@ -1331,6 +1627,34 @@ function init() {
     persistirSolicitudes();
     renderSolicitudes();
     aviso("Solicitudes eliminadas");
+  });
+
+  // Crear proyecto desde una solicitud (delegación)
+  $("#admin-solicitudes-lista").addEventListener("click", (e) => {
+    const boton = e.target.closest("[data-crear-proyecto]");
+    if (!boton) return;
+    const s = solicitudes.find((item) => item.id === boton.dataset.crearProyecto);
+    if (!s) return;
+    abrirEditorProyecto(null, { cliente: s.nombre, telefono: s.telefono, planId: s.planId });
+  });
+
+  // CRUD de proyectos
+  $("#btn-nuevo-proyecto").addEventListener("click", () => abrirEditorProyecto());
+  $("#admin-proyectos-lista").addEventListener("click", (e) => {
+    const btnEditar = e.target.closest("[data-editar-proyecto]");
+    const btnCerrar = e.target.closest("[data-cerrar-proyecto]");
+    const btnReabrir = e.target.closest("[data-reabrir-proyecto]");
+    const btnBorrar = e.target.closest("[data-borrar-proyecto]");
+    if (btnEditar) abrirEditorProyecto(btnEditar.dataset.editarProyecto);
+    if (btnCerrar) cerrarProyecto(btnCerrar.dataset.cerrarProyecto);
+    if (btnReabrir) reabrirProyecto(btnReabrir.dataset.reabrirProyecto);
+    if (btnBorrar) borrarProyecto(btnBorrar.dataset.borrarProyecto);
+  });
+
+  $("#form-proyecto").addEventListener("submit", guardarProyectoDesdeForm);
+  $("#btn-cancelar-proyecto").addEventListener("click", cerrarEditorProyecto);
+  $("#modal-proyecto").addEventListener("click", (e) => {
+    if (e.target === e.currentTarget) cerrarEditorProyecto();
   });
 }
 
