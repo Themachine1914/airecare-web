@@ -8,11 +8,11 @@
 <meta name="theme-color" content="#1870b8">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Almanzar">
+<meta name="apple-mobile-web-app-title" id="meta-app-title" content="Almanzar">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<link rel="manifest" href="manifest.webmanifest">
+<link rel="manifest" id="link-manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" href="assets/icon-192.png">
-<link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
+<link rel="apple-touch-icon" id="link-apple-icon" sizes="180x180" href="assets/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -388,6 +388,15 @@ textarea { resize: vertical; }
   background: #fff;
 }
 .admin-compartir-acciones { display: flex; flex-wrap: wrap; gap: 8px; }
+.admin-compartir-titulo {
+  display: flex; gap: 12px; align-items: center;
+}
+.admin-compartir-titulo .muted { margin-top: 2px; }
+.admin-app-icono {
+  width: 40px; height: 40px; border-radius: 9px; object-fit: cover;
+  box-shadow: 0 2px 8px rgba(24, 112, 184, 0.2); flex: none;
+}
+.admin-instalar-ayuda { font-size: 0.82rem; line-height: 1.45; }
 
 .admin-lista { display: grid; gap: 12px; }
 
@@ -710,6 +719,27 @@ textarea { resize: vertical; }
             <a class="btn-ghost" id="btn-abrir-planes" href="#planes">Abrir planes</a>
           </div>
         </div>
+      </div>
+
+      <div class="admin-compartir" id="bloque-compartir-admin">
+        <div class="admin-compartir-titulo">
+          <img src="assets/apple-touch-icon.png" alt="" width="40" height="40" class="admin-app-icono">
+          <div>
+            <strong>Panel en pantalla de inicio</strong>
+            <p class="muted">Mismo icono de Almanzar. Guarda el admin en el celular o compártelo.</p>
+          </div>
+        </div>
+        <div class="admin-compartir-fila">
+          <input type="text" id="link-admin-publico" readonly aria-label="Enlace del panel de administración">
+          <div class="admin-compartir-acciones">
+            <button type="button" class="btn-secundario" id="btn-copiar-link-admin">Copiar link</button>
+            <a class="btn" id="btn-whatsapp-admin" href="#" target="_blank" rel="noopener noreferrer">Compartir por WhatsApp</a>
+          </div>
+        </div>
+        <p class="muted admin-instalar-ayuda">
+          iPhone (Safari): Compartir → Añadir a pantalla de inicio.<br>
+          Android (Chrome): Menú → Instalar app / Añadir a pantalla de inicio.
+        </p>
       </div>
 
       <div class="admin-tabs">
@@ -1161,9 +1191,30 @@ function urlPublicaPlanes() {
   return `${window.location.origin}${ruta}#planes`;
 }
 
+function urlPublicaAdmin() {
+  const ruta = window.location.pathname || "/";
+  return `${window.location.origin}${ruta}#/admin`;
+}
+
 function mensajeWhatsAppPlanes() {
   const empresa = datos.empresa || "Almanzar Multiservicios";
   return `Hola, te comparto los planes de mantenimiento de *${empresa}*:\n${urlPublicaPlanes()}`;
+}
+
+function mensajeWhatsAppAdmin() {
+  const empresa = datos.empresa || "Almanzar Multiservicios";
+  return `Panel de administración de *${empresa}*:\n${urlPublicaAdmin()}`;
+}
+
+function actualizarManifestPwa(esAdmin) {
+  const manifest = $("#link-manifest");
+  const tituloApp = $("#meta-app-title");
+  if (manifest) {
+    manifest.setAttribute("href", esAdmin ? "manifest-admin.webmanifest" : "manifest.webmanifest");
+  }
+  if (tituloApp) {
+    tituloApp.setAttribute("content", esAdmin ? "Almanzar Admin" : "Almanzar");
+  }
 }
 
 function actualizarBloqueCompartirPlanes() {
@@ -1177,13 +1228,21 @@ function actualizarBloqueCompartirPlanes() {
   if (btnAbrir) btnAbrir.href = url;
 }
 
-async function copiarLinkPlanes() {
-  const url = urlPublicaPlanes();
+function actualizarBloqueCompartirAdmin() {
+  const url = urlPublicaAdmin();
+  const input = $("#link-admin-publico");
+  const btnWa = $("#btn-whatsapp-admin");
+  if (!input || !btnWa) return;
+  input.value = url;
+  btnWa.href = `https://wa.me/?text=${encodeURIComponent(mensajeWhatsAppAdmin())}`;
+}
+
+async function copiarTexto(url, inputSelector) {
   try {
     if (navigator.clipboard && navigator.clipboard.writeText) {
       await navigator.clipboard.writeText(url);
     } else {
-      const input = $("#link-planes-publico");
+      const input = $(inputSelector);
       input.focus();
       input.select();
       document.execCommand("copy");
@@ -1194,9 +1253,18 @@ async function copiarLinkPlanes() {
   }
 }
 
+async function copiarLinkPlanes() {
+  await copiarTexto(urlPublicaPlanes(), "#link-planes-publico");
+}
+
+async function copiarLinkAdmin() {
+  await copiarTexto(urlPublicaAdmin(), "#link-admin-publico");
+}
+
 function renderAdminPlanes() {
   $("#empresa-input").value = datos.empresa;
   actualizarBloqueCompartirPlanes();
+  actualizarBloqueCompartirAdmin();
   const contenedor = $("#admin-planes-lista");
   if (!datos.planes.length) {
     contenedor.innerHTML = '<p class="vacio">No hay planes. Crea el primero con «Nuevo plan».</p>';
@@ -1337,6 +1405,7 @@ function aplicarRuta() {
   const esAdmin = location.hash.startsWith("#/admin");
   const vistaPublica = $("#vista-publica");
   const vistaAdmin = $("#vista-admin");
+  actualizarManifestPwa(esAdmin);
   if (esAdmin) {
     vistaPublica.hidden = true;
     vistaAdmin.hidden = false;
@@ -1838,8 +1907,11 @@ function init() {
   });
 
   $("#btn-copiar-link-planes").addEventListener("click", copiarLinkPlanes);
+  $("#btn-copiar-link-admin").addEventListener("click", copiarLinkAdmin);
   $("#link-planes-publico").addEventListener("focus", (e) => e.target.select());
+  $("#link-admin-publico").addEventListener("focus", (e) => e.target.select());
   actualizarBloqueCompartirPlanes();
+  actualizarBloqueCompartirAdmin();
 
   // CRUD de planes
   $("#btn-nuevo-plan").addEventListener("click", () => abrirEditorPlan());
