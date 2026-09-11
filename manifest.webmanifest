@@ -1,8 +1,8 @@
 {
-  "name": "Almanzar Multiservicios",
+  "name": "Almanzar Admin",
   "short_name": "Almanzar",
-  "description": "Planes de mantenimiento preventivo de aires acondicionados.",
-  "start_url": "./",
+  "description": "Panel de administración de Almanzar Multiservicios.",
+  "start_url": "./#/admin",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait-primary",

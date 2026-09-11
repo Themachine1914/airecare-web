@@ -729,7 +729,7 @@ textarea { resize: vertical; }
           <img src="apple-touch-icon.png?v=3" alt="" width="40" height="40" class="admin-app-icono">
           <div>
             <strong>Panel en pantalla de inicio</strong>
-            <p class="muted">Mismo icono de Almanzar. Guarda el admin en el celular o compártelo.</p>
+            <p class="muted">Al abrir la app entra al panel de administración. Mismo icono de Almanzar.</p>
           </div>
         </div>
         <div class="admin-compartir-fila">
@@ -740,7 +740,7 @@ textarea { resize: vertical; }
           </div>
         </div>
         <p class="muted admin-instalar-ayuda">
-          iPhone (Safari): Compartir → Añadir a pantalla de inicio.<br>
+          iPhone (Safari): entra a este panel (#/admin) → Compartir → Añadir a pantalla de inicio.<br>
           Android (Chrome): Menú → Instalar app / Añadir a pantalla de inicio.
         </p>
       </div>
@@ -906,6 +906,7 @@ const CLAVE_DATOS = "airecare_datos";
 const CLAVE_SOLICITUDES = "airecare_solicitudes";
 const CLAVE_PROYECTOS = "airecare_proyectos";
 const CLAVE_SESION = "airecare_sesion";
+const CLAVE_APP_PORTADA = "airecare_app_portada";
 const WHATSAPP_NEGOCIO = "18296372748";
 
 const DATOS_ORIGINALES = {
@@ -1404,8 +1405,25 @@ function guardarCambiosDatos() {
 /* ============================================================
    RUTAS Y SESIÓN
    ============================================================ */
+function esAppInstalada() {
+  return (
+    window.matchMedia("(display-mode: standalone)").matches ||
+    window.matchMedia("(display-mode: fullscreen)").matches ||
+    window.navigator.standalone === true
+  );
+}
+
 function aplicarRuta() {
   const esAdmin = location.hash.startsWith("#/admin");
+
+  // Desde la app de pantalla de inicio, abrir siempre el panel admin
+  // (salvo que el usuario pulse «Ver portada»).
+  if (esAppInstalada() && !esAdmin && sessionStorage.getItem(CLAVE_APP_PORTADA) !== "1") {
+    location.replace("#/admin");
+    return;
+  }
+  if (esAdmin) sessionStorage.removeItem(CLAVE_APP_PORTADA);
+
   const vistaPublica = $("#vista-publica");
   const vistaAdmin = $("#vista-admin");
   actualizarManifestPwa(esAdmin);
@@ -1833,6 +1851,13 @@ function init() {
   mostrarSegunSesion();
 
   window.addEventListener("hashchange", aplicarRuta);
+
+  // Desde la app instalada, «Ver portada» sí puede mostrar la web pública
+  document.addEventListener("click", (e) => {
+    const enlace = e.target.closest('a[href="#/"], a[href="#"]');
+    if (!enlace) return;
+    if (esAppInstalada()) sessionStorage.setItem(CLAVE_APP_PORTADA, "1");
+  });
 
   // Menú móvil
   const nav = $("#nav-principal");
