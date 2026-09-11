@@ -1706,6 +1706,16 @@ function init() {
 
   // Formulario público
   $("#form-solicitud").addEventListener("submit", manejarEnvioSolicitud);
+  $("#btn-ubicacion-gps").addEventListener("click", capturarUbicacionGps);
+  $("#s-ubicacion").addEventListener("input", () => {
+    const enlace = detectarEnlaceMaps($("#s-ubicacion").value);
+    if (enlace) {
+      $("#s-mapa-url").value = enlace;
+      mostrarEstadoMapa(
+        `Enlace de Maps detectado. <a href="${esc(enlace)}" target="_blank" rel="noopener noreferrer">Abrir</a>`
+      );
+    }
+  });
 
   // Login admin
   $("#form-login").addEventListener("submit", (e) => {
