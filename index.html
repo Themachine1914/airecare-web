@@ -292,6 +292,23 @@ input:focus, select:focus, textarea:focus {
 input.invalido, select.invalido, textarea.invalido { border-color: var(--peligro); }
 textarea { resize: vertical; }
 
+.campo-ubicacion { display: grid; gap: 8px; margin-bottom: 14px; }
+.campo-ubicacion > label { margin-bottom: 0; }
+.ubicacion-acciones { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.ubicacion-acciones .btn-secundario {
+  padding: 10px 14px; font-size: 0.88rem; width: 100%;
+}
+.ubicacion-mapa-estado {
+  font-size: 0.86rem; color: var(--exito);
+  padding: 10px 12px; border-radius: var(--radio-s);
+  background: rgba(34, 122, 85, 0.08); border: 1px solid rgba(34, 122, 85, 0.25);
+}
+.ubicacion-mapa-estado a { color: var(--primario); font-weight: 600; }
+.ubicacion-mapa-estado.error {
+  color: var(--peligro);
+  background: rgba(178, 58, 46, 0.06); border-color: rgba(178, 58, 46, 0.25);
+}
+
 .form-error { color: var(--peligro); font-size: 0.86rem; margin: 4px 0 12px; }
 .form-ok {
   padding: 12px 16px; border-radius: var(--radio-s); font-size: 0.9rem; margin-bottom: 14px;
@@ -584,8 +601,19 @@ textarea { resize: vertical; }
           <label for="s-telefono">Teléfono / WhatsApp *</label>
           <input type="tel" id="s-telefono" autocomplete="tel" placeholder="Ej. 809 000 0000">
 
-          <label for="s-ubicacion">Ubicación / dirección *</label>
-          <input type="text" id="s-ubicacion" autocomplete="street-address" placeholder="Sector, calle, referencia o ciudad">
+          <div class="campo-ubicacion">
+            <label for="s-ubicacion">Dirección / ubicación *</label>
+            <input type="text" id="s-ubicacion" autocomplete="street-address" placeholder="Sector, calle o pega un enlace de Google Maps">
+            <div class="ubicacion-acciones">
+              <button type="button" class="btn-secundario" id="btn-ubicacion-gps">
+                Usar mi ubicación (Google Maps)
+              </button>
+            </div>
+            <p class="ubicacion-mapa-estado" id="s-ubicacion-mapa" hidden></p>
+            <input type="hidden" id="s-mapa-url" value="">
+            <input type="hidden" id="s-lat" value="">
+            <input type="hidden" id="s-lng" value="">
+          </div>
 
           <label for="s-plan">Plan de interés *</label>
           <select id="s-plan"></select>
@@ -1137,6 +1165,7 @@ function renderSolicitudes() {
         <span class="admin-fila-detalles">
           ${esc(s.telefono)} · ${formatoFecha(s.fecha)}
           ${s.ubicacion ? " · " + esc(s.ubicacion) : ""}
+          ${s.mapaUrl ? ` · <a href="${esc(s.mapaUrl)}" target="_blank" rel="noopener noreferrer">Ver en Maps</a>` : ""}
         </span>
         ${s.nota ? `<p class="lead-nota">“${esc(s.nota)}”</p>` : ""}
       </div>
@@ -1482,15 +1511,16 @@ function borrarProyecto(id) {
 /* ============================================================
    FORMULARIO PÚBLICO DE SOLICITUD
    ============================================================ */
-function mensajeWhatsAppSolicitud({ nombre, telefono, ubicacion, planNombre, nota }) {
+function mensajeWhatsAppSolicitud({ nombre, telefono, ubicacion, mapaUrl, planNombre, nota }) {
   const lineas = [
     "Hola, quiero solicitar un plan de mantenimiento.",
     "",
     `*Nombre:* ${nombre}`,
     `*Teléfono:* ${telefono}`,
-    `*Ubicación:* ${ubicacion}`,
-    `*Plan:* ${planNombre}`,
+    `*Dirección:* ${ubicacion}`,
   ];
+  if (mapaUrl) lineas.push(`*Google Maps:* ${mapaUrl}`);
+  lineas.push(`*Plan:* ${planNombre}`);
   if (nota) lineas.push(`*Nota:* ${nota}`);
   return lineas.join("\n");
 }
@@ -1498,6 +1528,80 @@ function mensajeWhatsAppSolicitud({ nombre, telefono, ubicacion, planNombre, not
 function enlaceWhatsAppSolicitud(datos) {
   const texto = mensajeWhatsAppSolicitud(datos);
   return `https://wa.me/${WHATSAPP_NEGOCIO}?text=${encodeURIComponent(texto)}`;
+}
+
+function urlGoogleMaps(lat, lng) {
+  return `https://www.google.com/maps?q=${lat},${lng}`;
+}
+
+function limpiarEstadoMapa() {
+  $("#s-mapa-url").value = "";
+  $("#s-lat").value = "";
+  $("#s-lng").value = "";
+  const estado = $("#s-ubicacion-mapa");
+  estado.hidden = true;
+  estado.classList.remove("error");
+  estado.innerHTML = "";
+}
+
+function mostrarEstadoMapa(html, esError = false) {
+  const estado = $("#s-ubicacion-mapa");
+  estado.hidden = false;
+  estado.classList.toggle("error", esError);
+  estado.innerHTML = html;
+}
+
+function aplicarUbicacionGps(lat, lng) {
+  const mapaUrl = urlGoogleMaps(lat, lng);
+  $("#s-lat").value = String(lat);
+  $("#s-lng").value = String(lng);
+  $("#s-mapa-url").value = mapaUrl;
+  const texto = $("#s-ubicacion").value.trim();
+  if (!texto || /^https?:\/\//i.test(texto) || /^-?\d+(\.\d+)?,\s*-?\d+(\.\d+)?$/.test(texto)) {
+    $("#s-ubicacion").value = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+  }
+  mostrarEstadoMapa(
+    `Ubicación del celular lista. <a href="${esc(mapaUrl)}" target="_blank" rel="noopener noreferrer">Abrir en Google Maps</a>`
+  );
+}
+
+function detectarEnlaceMaps(texto) {
+  const t = texto.trim();
+  if (!t) return "";
+  if (/maps\.google\.|google\.com\/maps|goo\.gl\/maps|maps\.app\.goo\.gl/i.test(t)) {
+    const match = t.match(/https?:\/\/\S+/i);
+    return match ? match[0] : t;
+  }
+  return "";
+}
+
+function capturarUbicacionGps() {
+  const boton = $("#btn-ubicacion-gps");
+  if (!navigator.geolocation) {
+    mostrarEstadoMapa("Este dispositivo no permite GPS. Pega un enlace de Google Maps en la dirección.", true);
+    return;
+  }
+  boton.disabled = true;
+  boton.textContent = "Obteniendo ubicación…";
+  mostrarEstadoMapa("Pide permiso de ubicación en el celular…");
+
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      boton.disabled = false;
+      boton.textContent = "Usar mi ubicación (Google Maps)";
+      aplicarUbicacionGps(pos.coords.latitude, pos.coords.longitude);
+      aviso("Ubicación añadida");
+    },
+    (err) => {
+      boton.disabled = false;
+      boton.textContent = "Usar mi ubicación (Google Maps)";
+      const msg = err.code === 1
+        ? "Permiso denegado. Activa la ubicación o pega el enlace de Google Maps."
+        : "No se pudo obtener la ubicación. Intenta de nuevo o pega el enlace de Maps.";
+      mostrarEstadoMapa(msg, true);
+    },
+    { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+  );
 }
 
 function manejarEnvioSolicitud(evento) {
@@ -1511,6 +1615,9 @@ function manejarEnvioSolicitud(evento) {
   const telefonoCrudo = $("#s-telefono").value.trim();
   const telefonoDigitos = telefonoCrudo.replace(/\D/g, "");
   const ubicacion = $("#s-ubicacion").value.trim();
+  let mapaUrl = $("#s-mapa-url").value.trim() || detectarEnlaceMaps(ubicacion);
+  const lat = $("#s-lat").value.trim();
+  const lng = $("#s-lng").value.trim();
   const planId = $("#s-plan").value;
   const nota = $("#s-nota").value.trim();
 
@@ -1526,8 +1633,12 @@ function manejarEnvioSolicitud(evento) {
 
   if (nombre.length < 2) return marcar("#s-nombre", "Escribe tu nombre completo.");
   if (telefonoDigitos.length < 7) return marcar("#s-telefono", "Escribe un teléfono válido (mínimo 7 dígitos).");
-  if (ubicacion.length < 3) return marcar("#s-ubicacion", "Indica tu ubicación o dirección.");
+  if (ubicacion.length < 3 && !mapaUrl) {
+    return marcar("#s-ubicacion", "Escribe la dirección o usa «Usar mi ubicación».");
+  }
   if (!planId) return marcar("#s-plan", "Selecciona un plan de interés.");
+
+  if (!mapaUrl && lat && lng) mapaUrl = urlGoogleMaps(lat, lng);
 
   const plan = planPorId(planId);
   const planNombre = plan ? plan.nombre : "Aún no lo sé";
@@ -1536,7 +1647,10 @@ function manejarEnvioSolicitud(evento) {
     fecha: new Date().toISOString(),
     nombre,
     telefono: telefonoCrudo,
-    ubicacion,
+    ubicacion: ubicacion || mapaUrl,
+    mapaUrl,
+    lat: lat || "",
+    lng: lng || "",
     planId: plan ? plan.id : "",
     planNombre,
     nota,
@@ -1545,6 +1659,7 @@ function manejarEnvioSolicitud(evento) {
   persistirSolicitudes();
   actualizarContadorSolicitudes();
   evento.target.reset();
+  limpiarEstadoMapa();
   ok.hidden = false;
   aviso("Abriendo WhatsApp…");
   window.open(enlaceWhatsAppSolicitud(solicitud), "_blank", "noopener,noreferrer");
@@ -1683,7 +1798,11 @@ function init() {
       cliente: s.nombre,
       telefono: s.telefono,
       planId: s.planId,
-      notas: [s.ubicacion ? `Ubicación: ${s.ubicacion}` : "", s.nota].filter(Boolean).join("\n"),
+      notas: [
+        s.ubicacion ? `Dirección: ${s.ubicacion}` : "",
+        s.mapaUrl ? `Google Maps: ${s.mapaUrl}` : "",
+        s.nota,
+      ].filter(Boolean).join("\n"),
     });
   });
 
