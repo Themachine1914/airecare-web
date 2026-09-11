@@ -366,6 +366,22 @@ textarea { resize: vertical; }
 .fila-flex input { margin-top: 6px; }
 .admin-barra-acciones { display: flex; gap: 10px; flex-wrap: wrap; }
 
+.admin-compartir {
+  display: grid; gap: 10px; margin-bottom: 28px; padding: 16px 18px;
+  border: 1px solid rgba(29, 111, 165, 0.22); border-radius: var(--radio-s);
+  background: rgba(29, 111, 165, 0.05);
+}
+.admin-compartir strong { font-size: 0.95rem; }
+.admin-compartir .muted { font-size: 0.88rem; }
+.admin-compartir-fila {
+  display: flex; flex-wrap: wrap; gap: 10px; align-items: stretch;
+}
+.admin-compartir-fila input {
+  flex: 1 1 220px; margin-top: 0; font-size: 0.88rem;
+  background: #fff;
+}
+.admin-compartir-acciones { display: flex; flex-wrap: wrap; gap: 8px; }
+
 .admin-lista { display: grid; gap: 12px; }
 
 .admin-fila {
@@ -676,6 +692,19 @@ textarea { resize: vertical; }
 
     <!-- Panel -->
     <section id="admin-panel" hidden>
+      <div class="admin-compartir" id="bloque-compartir-planes">
+        <strong>Link público de los planes</strong>
+        <p class="muted">Compártelo con clientes para que vean los planes y soliciten por WhatsApp.</p>
+        <div class="admin-compartir-fila">
+          <input type="text" id="link-planes-publico" readonly aria-label="Enlace público de planes">
+          <div class="admin-compartir-acciones">
+            <button type="button" class="btn-secundario" id="btn-copiar-link-planes">Copiar link</button>
+            <a class="btn" id="btn-whatsapp-planes" href="#" target="_blank" rel="noopener noreferrer">Compartir por WhatsApp</a>
+            <a class="btn-ghost" id="btn-abrir-planes" href="#planes">Abrir planes</a>
+          </div>
+        </div>
+      </div>
+
       <div class="admin-tabs">
         <button type="button" class="admin-tab activa" data-tab="planes">Planes</button>
         <button type="button" class="admin-tab" data-tab="solicitudes">
@@ -1120,8 +1149,47 @@ function renderPublico() {
 /* ============================================================
    RENDERIZADO — ADMINISTRACIÓN
    ============================================================ */
+function urlPublicaPlanes() {
+  const ruta = window.location.pathname || "/";
+  return `${window.location.origin}${ruta}#planes`;
+}
+
+function mensajeWhatsAppPlanes() {
+  const empresa = datos.empresa || "Almanzar Multiservicios";
+  return `Hola, te comparto los planes de mantenimiento de *${empresa}*:\n${urlPublicaPlanes()}`;
+}
+
+function actualizarBloqueCompartirPlanes() {
+  const url = urlPublicaPlanes();
+  const input = $("#link-planes-publico");
+  const btnWa = $("#btn-whatsapp-planes");
+  const btnAbrir = $("#btn-abrir-planes");
+  if (!input || !btnWa) return;
+  input.value = url;
+  btnWa.href = `https://wa.me/?text=${encodeURIComponent(mensajeWhatsAppPlanes())}`;
+  if (btnAbrir) btnAbrir.href = url;
+}
+
+async function copiarLinkPlanes() {
+  const url = urlPublicaPlanes();
+  try {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      await navigator.clipboard.writeText(url);
+    } else {
+      const input = $("#link-planes-publico");
+      input.focus();
+      input.select();
+      document.execCommand("copy");
+    }
+    aviso("Link copiado");
+  } catch {
+    aviso("No se pudo copiar. Selecciónalo manualmente.", "error");
+  }
+}
+
 function renderAdminPlanes() {
   $("#empresa-input").value = datos.empresa;
+  actualizarBloqueCompartirPlanes();
   const contenedor = $("#admin-planes-lista");
   if (!datos.planes.length) {
     contenedor.innerHTML = '<p class="vacio">No hay planes. Crea el primero con «Nuevo plan».</p>';
@@ -1758,8 +1826,13 @@ function init() {
     }
     datos.empresa = valor;
     guardarCambiosDatos();
+    actualizarBloqueCompartirPlanes();
     aviso("Nombre comercial actualizado");
   });
+
+  $("#btn-copiar-link-planes").addEventListener("click", copiarLinkPlanes);
+  $("#link-planes-publico").addEventListener("focus", (e) => e.target.select());
+  actualizarBloqueCompartirPlanes();
 
   // CRUD de planes
   $("#btn-nuevo-plan").addEventListener("click", () => abrirEditorPlan());
