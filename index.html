@@ -1,0 +1,1341 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AireCare — Mantenimiento de aires acondicionados</title>
+<meta name="description" content="Planes de mantenimiento preventivo de aires acondicionados. Tres visitas al año, gas incluido y reparaciones con descuento.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ctext y='19' font-size='19'%3E%E2%9D%84%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   AireCare — Demo: mantenimiento de aires acondicionados
+   Estética HVAC moderna: fondo oscuro, acentos cian / verde hielo
+   ============================================================ */
+:root {
+  --fondo: #060b12;
+  --fondo-2: #0a1320;
+  --tarjeta: #0d1826;
+  --tarjeta-2: #101e2f;
+  --borde: rgba(148, 163, 184, 0.14);
+  --borde-fuerte: rgba(34, 211, 238, 0.45);
+  --texto: #e6edf5;
+  --muted: #93a3b8;
+  --acento: #22d3ee;
+  --acento-2: #5eead4;
+  --exito: #34d399;
+  --peligro: #f87171;
+  --sombra: 0 20px 50px rgba(0, 0, 0, 0.45);
+  --radio: 16px;
+  --radio-s: 10px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  background: var(--fondo);
+  color: var(--texto);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+[hidden] { display: none !important; }
+
+.contenedor { width: min(1120px, 92%); margin-inline: auto; }
+
+h1, h2, h3 { line-height: 1.15; font-weight: 800; letter-spacing: -0.02em; }
+
+.muted { color: var(--muted); }
+
+.gradiente {
+  background: linear-gradient(90deg, var(--acento), var(--acento-2));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.seccion { padding: 84px 0; scroll-margin-top: 84px; }
+
+.titulo-seccion { font-size: clamp(1.6rem, 3.4vw, 2.3rem); margin-bottom: 10px; }
+.subtitulo-seccion { color: var(--muted); max-width: 620px; margin-bottom: 40px; }
+
+/* ---------- Botones ---------- */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 12px 22px; border-radius: 999px; border: 0; cursor: pointer;
+  font: inherit; font-weight: 700; font-size: 0.95rem; text-decoration: none;
+  color: #04222b;
+  background: linear-gradient(90deg, var(--acento), var(--acento-2));
+  transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+  box-shadow: 0 8px 24px rgba(34, 211, 238, 0.22);
+}
+.btn:hover { transform: translateY(-2px); filter: brightness(1.08); box-shadow: 0 12px 30px rgba(34, 211, 238, 0.32); }
+.btn:active { transform: translateY(0); }
+
+.btn-secundario {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 12px 22px; border-radius: 999px; cursor: pointer;
+  font: inherit; font-weight: 600; font-size: 0.95rem; text-decoration: none;
+  color: var(--texto); background: rgba(148, 163, 184, 0.08);
+  border: 1px solid var(--borde);
+  transition: border-color 0.15s ease, background 0.15s ease, transform 0.15s ease;
+}
+.btn-secundario:hover { border-color: var(--borde-fuerte); background: rgba(34, 211, 238, 0.08); transform: translateY(-2px); }
+
+.btn-ghost {
+  padding: 9px 16px; border-radius: 999px; cursor: pointer;
+  font: inherit; font-size: 0.88rem; font-weight: 600;
+  color: var(--muted); background: transparent; border: 1px solid var(--borde);
+  text-decoration: none; transition: color 0.15s ease, border-color 0.15s ease;
+}
+.btn-ghost:hover { color: var(--texto); border-color: var(--borde-fuerte); }
+
+.btn-peligro-ghost:hover { color: var(--peligro); border-color: rgba(248, 113, 113, 0.5); }
+
+.btn-block { width: 100%; }
+
+.btn-mini {
+  padding: 7px 14px; border-radius: 8px; cursor: pointer;
+  font: inherit; font-size: 0.83rem; font-weight: 600;
+  color: var(--acento); background: rgba(34, 211, 238, 0.1);
+  border: 1px solid rgba(34, 211, 238, 0.3); transition: background 0.15s ease;
+}
+.btn-mini:hover { background: rgba(34, 211, 238, 0.2); }
+.btn-mini-peligro { color: var(--peligro); background: rgba(248, 113, 113, 0.08); border-color: rgba(248, 113, 113, 0.3); }
+.btn-mini-peligro:hover { background: rgba(248, 113, 113, 0.18); }
+
+/* ---------- Cabecera ---------- */
+.cabecera {
+  position: fixed; inset: 0 0 auto 0; z-index: 50;
+  background: rgba(6, 11, 18, 0.78);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--borde);
+}
+.cabecera-inner { display: flex; align-items: center; gap: 24px; height: 68px; }
+
+.marca {
+  display: inline-flex; align-items: center; gap: 10px;
+  font-weight: 800; font-size: 1.15rem; color: var(--texto); text-decoration: none;
+}
+.marca-icono {
+  display: grid; place-items: center; width: 36px; height: 36px;
+  border-radius: 10px; color: #04222b;
+  background: linear-gradient(135deg, var(--acento), var(--acento-2));
+  box-shadow: 0 4px 16px rgba(34, 211, 238, 0.35);
+}
+.marca-icono svg { width: 22px; height: 22px; }
+
+.nav { display: flex; gap: 22px; margin-left: auto; }
+.nav a {
+  color: var(--muted); text-decoration: none; font-size: 0.92rem; font-weight: 500;
+  transition: color 0.15s ease;
+}
+.nav a:hover { color: var(--texto); }
+
+.cabecera-acciones { display: flex; align-items: center; gap: 10px; }
+
+.nav-toggle {
+  display: none; background: none; border: 1px solid var(--borde);
+  border-radius: 8px; padding: 8px; cursor: pointer; color: var(--texto);
+}
+
+/* ---------- Hero ---------- */
+.hero {
+  position: relative; overflow: hidden;
+  padding: 170px 0 100px;
+  background:
+    radial-gradient(700px 340px at 78% -10%, rgba(34, 211, 238, 0.16), transparent 60%),
+    radial-gradient(600px 320px at 8% 20%, rgba(94, 234, 212, 0.1), transparent 60%),
+    var(--fondo);
+}
+.hero::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background-image:
+    linear-gradient(rgba(148, 163, 184, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(148, 163, 184, 0.05) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: radial-gradient(700px 400px at 60% 0%, black, transparent 75%);
+  -webkit-mask-image: radial-gradient(700px 400px at 60% 0%, black, transparent 75%);
+}
+.hero-badge {
+  display: inline-block; padding: 7px 16px; border-radius: 999px;
+  font-size: 0.8rem; font-weight: 600; letter-spacing: 0.04em;
+  color: var(--acento-2); background: rgba(94, 234, 212, 0.08);
+  border: 1px solid rgba(94, 234, 212, 0.25);
+  margin-bottom: 22px;
+}
+.hero h1 { font-size: clamp(2.2rem, 5.4vw, 3.7rem); max-width: 780px; }
+.hero-texto { color: var(--muted); font-size: 1.08rem; max-width: 620px; margin: 20px 0 32px; }
+.hero-acciones { display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 44px; }
+
+.hero-puntos { display: flex; flex-wrap: wrap; gap: 12px 28px; list-style: none; }
+.hero-puntos li { display: flex; align-items: center; gap: 9px; color: var(--muted); font-size: 0.92rem; }
+.hero-puntos svg { width: 17px; height: 17px; color: var(--acento-2); flex: none; }
+
+/* ---------- Tarjetas de planes ---------- */
+.planes-grid {
+  display: grid; gap: 22px;
+  grid-template-columns: repeat(auto-fit, minmax(235px, 1fr));
+  align-items: stretch;
+}
+
+.plan-card {
+  position: relative; display: flex; flex-direction: column;
+  padding: 30px 26px; border-radius: var(--radio);
+  background: linear-gradient(160deg, var(--tarjeta-2), var(--tarjeta));
+  border: 1px solid var(--borde);
+  transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+}
+.plan-card:hover { transform: translateY(-5px); border-color: rgba(34, 211, 238, 0.35); box-shadow: var(--sombra); }
+
+.plan-card.destacado {
+  border-color: var(--borde-fuerte);
+  box-shadow: 0 0 0 1px rgba(34, 211, 238, 0.25), 0 18px 48px rgba(34, 211, 238, 0.14);
+}
+.plan-card.destacado:hover { box-shadow: 0 0 0 1px rgba(34, 211, 238, 0.4), 0 24px 56px rgba(34, 211, 238, 0.2); }
+
+.badge-recomendado {
+  position: absolute; top: -13px; left: 50%; transform: translateX(-50%);
+  padding: 5px 14px; border-radius: 999px; white-space: nowrap;
+  font-size: 0.72rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+  color: #04222b; background: linear-gradient(90deg, var(--acento), var(--acento-2));
+  box-shadow: 0 6px 18px rgba(34, 211, 238, 0.4);
+}
+
+.plan-card h3 { font-size: 1.18rem; margin-bottom: 12px; }
+
+.plan-precio { display: flex; align-items: baseline; gap: 6px; margin-bottom: 4px; }
+.plan-precio .precio { font-size: 2.1rem; font-weight: 800; letter-spacing: -0.03em; }
+.plan-precio .periodo { color: var(--muted); font-size: 0.9rem; }
+
+.plan-aires { color: var(--texto); font-weight: 600; font-size: 0.95rem; margin-top: 8px; }
+.plan-visitas {
+  display: inline-flex; width: fit-content; margin: 8px 0 16px;
+  padding: 4px 12px; border-radius: 999px; font-size: 0.8rem; font-weight: 600;
+  color: var(--acento); background: rgba(34, 211, 238, 0.08); border: 1px solid rgba(34, 211, 238, 0.22);
+}
+
+.plan-beneficios { list-style: none; display: grid; gap: 10px; margin-bottom: 24px; flex: 1; }
+.plan-beneficios li { display: flex; gap: 10px; font-size: 0.9rem; color: var(--muted); }
+.plan-beneficios svg { width: 17px; height: 17px; color: var(--acento-2); flex: none; margin-top: 2px; }
+
+.planes-vacio {
+  padding: 40px; border: 1px dashed var(--borde); border-radius: var(--radio);
+  color: var(--muted); text-align: center;
+}
+
+/* ---------- Tabla comparativa ---------- */
+.tabla-scroll { overflow-x: auto; border: 1px solid var(--borde); border-radius: var(--radio); background: var(--tarjeta); }
+
+.tabla-comparativa { width: 100%; min-width: 720px; border-collapse: collapse; font-size: 0.92rem; }
+.tabla-comparativa th, .tabla-comparativa td { padding: 15px 18px; text-align: center; border-bottom: 1px solid var(--borde); }
+.tabla-comparativa thead th { vertical-align: bottom; }
+.tabla-comparativa tbody tr:last-child th, .tabla-comparativa tbody tr:last-child td { border-bottom: 0; }
+
+.tc-nombre { display: block; font-weight: 700; }
+.tc-precio { display: block; color: var(--acento); font-weight: 800; font-size: 1.05rem; margin-top: 2px; }
+.tc-precio small { color: var(--muted); font-weight: 500; }
+
+.tabla-comparativa .col-etiqueta {
+  text-align: left; color: var(--muted); font-weight: 600; font-size: 0.85rem;
+  background: rgba(148, 163, 184, 0.04); min-width: 190px;
+}
+.tabla-comparativa td { color: var(--texto); }
+.tabla-comparativa .col-destacada { background: rgba(34, 211, 238, 0.07); box-shadow: inset 0 1px 0 rgba(34, 211, 238, 0.12), inset 0 -1px 0 rgba(34, 211, 238, 0.12); }
+.tabla-comparativa thead .col-destacada { border-radius: 12px 12px 0 0; }
+
+/* ---------- FAQ ---------- */
+.faq-lista { display: grid; gap: 14px; max-width: 780px; }
+.faq-item {
+  border: 1px solid var(--borde); border-radius: var(--radio-s);
+  background: var(--tarjeta); overflow: hidden; transition: border-color 0.15s ease;
+}
+.faq-item[open] { border-color: rgba(34, 211, 238, 0.3); }
+.faq-item summary {
+  cursor: pointer; list-style: none; padding: 18px 22px;
+  font-weight: 600; display: flex; justify-content: space-between; align-items: center; gap: 16px;
+}
+.faq-item summary::-webkit-details-marker { display: none; }
+.faq-item summary::after {
+  content: "+"; color: var(--acento); font-size: 1.3rem; font-weight: 400; flex: none;
+  transition: transform 0.15s ease;
+}
+.faq-item[open] summary::after { transform: rotate(45deg); }
+.faq-item p { padding: 0 22px 18px; color: var(--muted); font-size: 0.94rem; }
+
+/* ---------- Formulario público ---------- */
+.seccion-solicitud {
+  display: grid; grid-template-columns: 1fr 1.1fr; gap: 48px; align-items: start;
+}
+
+.form-card {
+  padding: 32px; border-radius: var(--radio);
+  background: linear-gradient(160deg, var(--tarjeta-2), var(--tarjeta));
+  border: 1px solid var(--borde);
+  transition: box-shadow 0.3s ease, border-color 0.3s ease;
+}
+.form-card.pulso { border-color: var(--borde-fuerte); box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.18); }
+.form-card h3 { margin-bottom: 20px; font-size: 1.15rem; }
+
+label { display: block; font-size: 0.86rem; font-weight: 600; margin-bottom: 14px; color: var(--texto); }
+input, select, textarea {
+  width: 100%; margin-top: 6px; padding: 11px 14px;
+  font: inherit; font-size: 0.95rem; color: var(--texto);
+  background: rgba(6, 11, 18, 0.6); border: 1px solid var(--borde); border-radius: var(--radio-s);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+input:focus, select:focus, textarea:focus {
+  outline: none; border-color: var(--acento); box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.15);
+}
+input.invalido, select.invalido, textarea.invalido { border-color: var(--peligro); }
+textarea { resize: vertical; }
+
+.form-error { color: var(--peligro); font-size: 0.86rem; margin: 4px 0 12px; }
+.form-ok {
+  padding: 12px 16px; border-radius: var(--radio-s); font-size: 0.9rem; margin-bottom: 14px;
+  color: var(--exito); background: rgba(52, 211, 153, 0.08); border: 1px solid rgba(52, 211, 153, 0.3);
+}
+
+/* ---------- Pie ---------- */
+.pie { border-top: 1px solid var(--borde); padding: 34px 0; background: var(--fondo-2); }
+.pie-inner { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; justify-content: space-between; color: var(--muted); font-size: 0.88rem; }
+.pie a { color: var(--muted); text-decoration: none; }
+.pie a:hover { color: var(--acento); }
+
+/* ---------- Administración ---------- */
+.admin-main { padding: 110px 0 70px; }
+
+.login-caja {
+  max-width: 420px; margin: 40px auto; padding: 34px;
+  border: 1px solid var(--borde); border-radius: var(--radio); background: var(--tarjeta);
+}
+.login-caja h2 { margin-bottom: 8px; }
+.credenciales {
+  margin: 14px 0 22px; padding: 12px 16px; border-radius: var(--radio-s);
+  background: rgba(34, 211, 238, 0.06); border: 1px dashed rgba(34, 211, 238, 0.35);
+  font-size: 0.9rem; color: var(--texto);
+}
+.credenciales code { color: var(--acento); font-weight: 700; }
+
+.admin-tabs { display: flex; gap: 8px; margin-bottom: 28px; border-bottom: 1px solid var(--borde); }
+.admin-tab {
+  padding: 12px 20px; background: none; border: 0; cursor: pointer;
+  font: inherit; font-weight: 600; font-size: 0.95rem; color: var(--muted);
+  border-bottom: 2px solid transparent; margin-bottom: -1px; transition: color 0.15s ease;
+}
+.admin-tab:hover { color: var(--texto); }
+.admin-tab.activa { color: var(--acento); border-bottom-color: var(--acento); }
+
+.contador {
+  display: inline-grid; place-items: center; min-width: 22px; height: 22px;
+  padding: 0 6px; margin-left: 6px; border-radius: 999px;
+  font-size: 0.75rem; font-weight: 700; color: #04222b;
+  background: linear-gradient(90deg, var(--acento), var(--acento-2));
+}
+
+.admin-barra {
+  display: flex; flex-wrap: wrap; gap: 18px; align-items: flex-end;
+  justify-content: space-between; margin-bottom: 24px;
+}
+.campo-empresa { flex: 1 1 320px; max-width: 460px; }
+.fila-flex { display: flex; gap: 10px; }
+.fila-flex input { margin-top: 6px; }
+.admin-barra-acciones { display: flex; gap: 10px; flex-wrap: wrap; }
+
+.admin-lista { display: grid; gap: 12px; }
+
+.admin-fila {
+  display: flex; flex-wrap: wrap; gap: 14px; align-items: center; justify-content: space-between;
+  padding: 16px 20px; border: 1px solid var(--borde); border-radius: var(--radio-s); background: var(--tarjeta);
+  transition: border-color 0.15s ease;
+}
+.admin-fila:hover { border-color: rgba(34, 211, 238, 0.28); }
+.admin-fila-info { display: grid; gap: 3px; }
+.admin-fila-detalles { color: var(--muted); font-size: 0.85rem; }
+.admin-fila-acciones { display: flex; gap: 8px; }
+
+.chip {
+  display: inline-block; width: fit-content; padding: 2px 10px; border-radius: 999px;
+  font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;
+  color: var(--acento-2); background: rgba(94, 234, 212, 0.1); border: 1px solid rgba(94, 234, 212, 0.3);
+}
+.chip-chip { color: var(--muted); font-size: 0.85rem; }
+.lead-nota { color: var(--muted); font-size: 0.88rem; font-style: italic; margin-top: 4px; }
+.vacio { color: var(--muted); padding: 26px; text-align: center; border: 1px dashed var(--borde); border-radius: var(--radio-s); }
+
+/* ---------- Modal editor de plan ---------- */
+.modal-fondo {
+  position: fixed; inset: 0; z-index: 100; display: grid; place-items: center;
+  background: rgba(3, 6, 10, 0.7); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+  padding: 20px; overflow-y: auto;
+}
+.modal {
+  width: min(620px, 100%); max-height: 92vh; overflow-y: auto;
+  padding: 30px; border-radius: var(--radio);
+  background: var(--tarjeta-2); border: 1px solid var(--borde); box-shadow: var(--sombra);
+}
+.modal h3 { margin-bottom: 20px; }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0 16px; }
+.check-linea { display: flex; align-items: center; gap: 10px; font-size: 0.9rem; }
+.check-linea input { width: auto; margin: 0; accent-color: var(--acento); }
+.modal-acciones { display: flex; justify-content: flex-end; gap: 10px; margin-top: 8px; }
+
+/* ---------- Avisos (toast) ---------- */
+.avisos { position: fixed; right: 20px; bottom: 20px; z-index: 200; display: grid; gap: 10px; }
+.aviso {
+  padding: 13px 20px; border-radius: var(--radio-s); font-size: 0.9rem; font-weight: 600;
+  background: var(--tarjeta-2); border: 1px solid rgba(52, 211, 153, 0.4); color: var(--exito);
+  box-shadow: var(--sombra); opacity: 0; transform: translateY(8px); transition: all 0.25s ease;
+}
+.aviso.visible { opacity: 1; transform: translateY(0); }
+.aviso-error { border-color: rgba(248, 113, 113, 0.4); color: var(--peligro); }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 860px) {
+  .seccion { padding: 60px 0; }
+  .nav {
+    display: none; position: absolute; top: 68px; left: 0; right: 0;
+    flex-direction: column; gap: 0; padding: 10px 4%;
+    background: rgba(6, 11, 18, 0.97); border-bottom: 1px solid var(--borde);
+  }
+  .nav.abierta { display: flex; }
+  .nav a { padding: 13px 6px; border-bottom: 1px solid var(--borde); }
+  .nav a:last-child { border-bottom: 0; }
+  .nav-toggle { display: inline-flex; }
+  .cabecera-acciones { margin-left: auto; }
+  .nav + .cabecera-acciones { margin-left: 0; }
+  .cabecera-inner { gap: 12px; }
+  .seccion-solicitud { grid-template-columns: 1fr; gap: 30px; }
+  .hero { padding: 140px 0 70px; }
+}
+
+@media (max-width: 560px) {
+  .grid-2 { grid-template-columns: 1fr; }
+  .admin-barra { align-items: stretch; flex-direction: column; }
+  .form-card { padding: 24px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  * { transition: none !important; }
+}
+</style>
+</head>
+
+<body>
+
+<!-- ==================== VISTA PÚBLICA ==================== -->
+<div id="vista-publica">
+
+  <header class="cabecera">
+    <div class="contenedor cabecera-inner">
+      <a class="marca" href="#/">
+        <span class="marca-icono" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2v20"/><path d="M12 2l-2.5 2.5M12 2l2.5 2.5M12 22l-2.5-2.5M12 22l2.5-2.5"/>
+            <path d="M3.5 7l17 10"/><path d="M3.5 7l.8 3.4M3.5 7l3.4-.8M20.5 17l-.8-3.4M20.5 17l-3.4.8"/>
+            <path d="M3.5 17L20.5 7"/><path d="M3.5 17l3.4.8M3.5 17l.8-3.4M20.5 7l-3.4-.8M20.5 7l-.8 3.4"/>
+          </svg>
+        </span>
+        <span class="js-marca">AireCare</span>
+      </a>
+      <nav class="nav" id="nav-principal">
+        <a href="#planes">Planes</a>
+        <a href="#comparar">Comparar</a>
+        <a href="#faq">Preguntas</a>
+        <a href="#solicitud">Contacto</a>
+      </nav>
+      <div class="cabecera-acciones">
+        <a class="btn" href="#solicitud">Solicitar plan</a>
+        <button class="nav-toggle" id="nav-toggle" aria-label="Abrir menú" aria-expanded="false">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+            <path d="M3 5h14M3 10h14M3 15h14"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- Hero -->
+    <section class="hero">
+      <div class="contenedor">
+        <span class="hero-badge">Mantenimiento preventivo · 3 visitas al año</span>
+        <h1>Aire frío todo el año, <span class="gradiente">sin sorpresas</span></h1>
+        <p class="hero-texto">
+          El mantenimiento preventivo alarga la vida de tus aires, reduce el consumo eléctrico
+          y evita averías justo cuando más los necesitas. Elige tu plan y nosotros nos ocupamos
+          del resto: visitas pautadas, gas incluido y reparaciones con descuento.
+        </p>
+        <div class="hero-acciones">
+          <a class="btn" href="#planes">Ver planes</a>
+          <a class="btn-secundario" href="#solicitud">Solicitar mantenimiento</a>
+        </div>
+        <ul class="hero-puntos">
+          <li>
+            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.5l4 4 8-9"/></svg>
+            3 visitas al año en todos los planes
+          </li>
+          <li>
+            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.5l4 4 8-9"/></svg>
+            Técnicos especializados en tu zona
+          </li>
+          <li>
+            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.5l4 4 8-9"/></svg>
+            Coordinación por teléfono o WhatsApp
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Planes -->
+    <section id="planes" class="seccion">
+      <div class="contenedor">
+        <h2 class="titulo-seccion">Planes de mantenimiento</h2>
+        <p class="subtitulo-seccion">
+          Todos los planes incluyen <strong>3 mantenimientos al año</strong>. Elige según la
+          cantidad de aires de tu hogar o negocio.
+        </p>
+        <div class="planes-grid" id="planes-grid"></div>
+      </div>
+    </section>
+
+    <!-- Comparativa -->
+    <section id="comparar" class="seccion" style="padding-top:0">
+      <div class="contenedor">
+        <h2 class="titulo-seccion">Compara los planes</h2>
+        <p class="subtitulo-seccion">Beneficios lado a lado para que elijas con claridad.</p>
+        <div id="tabla-comparativa"></div>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section id="faq" class="seccion" style="padding-top:0">
+      <div class="contenedor">
+        <h2 class="titulo-seccion">Preguntas frecuentes</h2>
+        <p class="subtitulo-seccion">Lo que más nos preguntan antes de contratar.</p>
+        <div class="faq-lista">
+          <details class="faq-item">
+            <summary>¿Cada cuánto tiempo se realiza el mantenimiento?</summary>
+            <p>Cada plan incluye 3 mantenimientos al año, aproximadamente uno cada 4 meses. Al contratar, calendarizamos las visitas contigo y te recordamos antes de cada una.</p>
+          </details>
+          <details class="faq-item">
+            <summary>¿Qué incluye cada visita de mantenimiento?</summary>
+            <p>Limpieza profunda de filtros y serpentín, corrección de cinta de rotor, revisión eléctrica básica, medición de presión y gas, y verificación del drenaje de condensado.</p>
+          </details>
+          <details class="faq-item">
+            <summary>¿Qué pasa si mi aire necesita una reparación mayor?</summary>
+            <p>Dependiendo de tu plan tienes libras de gas incluidas, reparación de tarjeta gratis o con descuento, y desinstalación e instalación con precios preferenciales.</p>
+          </details>
+          <details class="faq-item">
+            <summary>¿Puedo cambiar de plan después?</summary>
+            <p>Sí. Al renovar puedes subir o bajar de plan según tus equipos. Nuestro equipo te orienta para que elijas el que mejor te conviene.</p>
+          </details>
+          <details class="faq-item">
+            <summary>¿Cómo solicito el servicio?</summary>
+            <p>Llena el formulario de solicitud con tus datos y el plan de tu interés. Te contactamos por teléfono o WhatsApp para agendar la primera visita.</p>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <!-- Solicitud -->
+    <section id="solicitud" class="seccion" style="padding-top:0">
+      <div class="contenedor seccion-solicitud">
+        <div>
+          <h2 class="titulo-seccion">Solicita tu plan</h2>
+          <p class="muted" style="max-width:420px">
+            Déjanos tus datos y te contactamos para agendar la primera visita y resolver
+            cualquier duda sobre los planes. Sin compromiso.
+          </p>
+        </div>
+        <form class="form-card" id="form-solicitud" novalidate>
+          <label for="s-nombre">Nombre completo *</label>
+          <input type="text" id="s-nombre" autocomplete="name" placeholder="Tu nombre">
+
+          <label for="s-telefono">Teléfono / WhatsApp *</label>
+          <input type="tel" id="s-telefono" autocomplete="tel" placeholder="Ej. 809 000 0000">
+
+          <label for="s-plan">Plan de interés *</label>
+          <select id="s-plan"></select>
+
+          <label for="s-nota">Nota (opcional)</label>
+          <textarea id="s-nota" rows="3" placeholder="Cuéntanos cuántos aires tienes, marcas, ubicación, etc."></textarea>
+
+          <p class="form-error" id="solicitud-error" hidden></p>
+          <p class="form-ok" id="solicitud-ok" hidden>
+            Solicitud recibida. Te contactaremos pronto para agendar la primera visita.
+          </p>
+          <button type="submit" class="btn btn-block">Enviar solicitud</button>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <footer class="pie">
+    <div class="contenedor pie-inner">
+      <span>© <span id="anio-actual"></span> <span class="js-marca">AireCare</span> — Mantenimiento de aires acondicionados</span>
+      <a href="#/admin">Acceso admin</a>
+    </div>
+  </footer>
+</div>
+
+<!-- ==================== VISTA ADMINISTRACIÓN ==================== -->
+<div id="vista-admin" hidden>
+
+  <header class="cabecera">
+    <div class="contenedor cabecera-inner">
+      <span class="marca">
+        <span class="marca-icono" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2v20"/><path d="M12 2l-2.5 2.5M12 2l2.5 2.5M12 22l-2.5-2.5M12 22l2.5-2.5"/>
+            <path d="M3.5 7l17 10"/><path d="M3.5 7l.8 3.4M3.5 7l3.4-.8M20.5 17l-.8-3.4M20.5 17l-3.4.8"/>
+            <path d="M3.5 17L20.5 7"/><path d="M3.5 17l3.4.8M3.5 17l.8-3.4M20.5 7l-3.4-.8M20.5 7l-.8 3.4"/>
+          </svg>
+        </span>
+        Panel · <span class="js-marca">AireCare</span>
+      </span>
+      <div class="cabecera-acciones">
+        <a class="btn-ghost" href="#/">Ver portada</a>
+        <button class="btn-ghost" id="btn-logout" type="button">Cerrar sesión</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="contenedor admin-main">
+
+    <!-- Login -->
+    <section id="admin-login" class="login-caja">
+      <h2>Acceso de administración</h2>
+      <p class="muted">Demo: usa estas credenciales para entrar.</p>
+      <p class="credenciales">Usuario: <code>admin</code> · Contraseña: <code>airecare</code></p>
+      <form id="form-login" novalidate>
+        <label for="login-usuario">Usuario</label>
+        <input type="text" id="login-usuario" autocomplete="username" placeholder="admin">
+
+        <label for="login-clave">Contraseña</label>
+        <input type="password" id="login-clave" autocomplete="current-password" placeholder="airecare">
+
+        <p class="form-error" id="login-error" hidden>Usuario o contraseña incorrectos.</p>
+        <button type="submit" class="btn btn-block">Entrar</button>
+      </form>
+    </section>
+
+    <!-- Panel -->
+    <section id="admin-panel" hidden>
+      <div class="admin-tabs">
+        <button type="button" class="admin-tab activa" data-tab="planes">Planes</button>
+        <button type="button" class="admin-tab" data-tab="solicitudes">
+          Solicitudes <span class="contador" id="contador-solicitudes">0</span>
+        </button>
+      </div>
+
+      <!-- Pestaña: planes -->
+      <div id="panel-planes" class="admin-panel-seccion">
+        <div class="admin-barra">
+          <div class="campo-empresa">
+            <label for="empresa-input">Nombre comercial (visible en la portada)</label>
+            <div class="fila-flex">
+              <input type="text" id="empresa-input">
+              <button type="button" class="btn-secundario" id="btn-guardar-empresa">Guardar</button>
+            </div>
+          </div>
+          <div class="admin-barra-acciones">
+            <button type="button" class="btn" id="btn-nuevo-plan">+ Nuevo plan</button>
+            <button type="button" class="btn-ghost" id="btn-restaurar">Restaurar datos originales</button>
+          </div>
+        </div>
+        <div id="admin-planes-lista" class="admin-lista"></div>
+      </div>
+
+      <!-- Pestaña: solicitudes -->
+      <div id="panel-solicitudes" class="admin-panel-seccion" hidden>
+        <div class="admin-barra">
+          <p class="muted">Solicitudes enviadas desde el formulario público. Se guardan solo en este navegador (localStorage).</p>
+          <button type="button" class="btn-ghost btn-peligro-ghost" id="btn-vaciar-solicitudes">Vaciar solicitudes</button>
+        </div>
+        <div id="admin-solicitudes-lista" class="admin-lista"></div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- ==================== MODAL: EDITOR DE PLAN ==================== -->
+<div class="modal-fondo" id="modal-plan" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-titulo">
+    <h3 id="modal-titulo">Nuevo plan</h3>
+    <form id="form-plan" novalidate>
+      <input type="hidden" id="f-id">
+
+      <label for="f-nombre">Nombre del plan *</label>
+      <input type="text" id="f-nombre" placeholder="Ej. Plan Premium">
+
+      <div class="grid-2">
+        <label for="f-precio">Precio anual (USD) *</label>
+        <input type="number" id="f-precio" min="0" step="1" placeholder="800">
+
+        <label for="f-aires">Aires cubiertos *</label>
+        <input type="text" id="f-aires" placeholder="Ej. 4-5 aires">
+
+        <label for="f-gas">Libras de gas incluidas / año</label>
+        <input type="number" id="f-gas" min="0" step="1" placeholder="0">
+
+        <label for="f-mant">Mantenimientos / año</label>
+        <input type="number" id="f-mant" min="1" step="1" value="3">
+
+        <label for="f-tarjeta">Reparación de tarjeta (texto tabla)</label>
+        <input type="text" id="f-tarjeta" placeholder="Ej. 50% de descuento · Gratis">
+
+        <label for="f-desinstalacion">Desinstalación / instalación (texto tabla)</label>
+        <input type="text" id="f-desinstalacion" placeholder="Ej. 50% de descuento · Gratis">
+      </div>
+
+      <label for="f-beneficios">Beneficios (uno por línea) *</label>
+      <textarea id="f-beneficios" rows="5" placeholder="Corrección de cinta de rotor&#10;Reparación eléctrica básica"></textarea>
+
+      <label class="check-linea" for="f-destacado">
+        <input type="checkbox" id="f-destacado">
+        Marcar como plan recomendado
+      </label>
+
+      <p class="form-error" id="plan-error" hidden></p>
+
+      <div class="modal-acciones">
+        <button type="button" class="btn-ghost" id="btn-cancelar-plan">Cancelar</button>
+        <button type="submit" class="btn">Guardar plan</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="avisos" id="avisos" aria-live="polite"></div>
+
+<script>
+/* ============================================================
+   AireCare — Lógica de la aplicación (demo sin backend)
+   - Una sola fuente de datos (`datos`) compartida por portada y admin
+   - Persistencia en localStorage
+   ============================================================ */
+(() => {
+"use strict";
+
+/* ---------- Constantes ---------- */
+const CLAVE_DATOS = "airecare_datos";
+const CLAVE_SOLICITUDES = "airecare_solicitudes";
+const CLAVE_SESION = "airecare_sesion";
+
+const DATOS_ORIGINALES = {
+  empresa: "AireCare",
+  planes: [
+    {
+      id: "basico",
+      nombre: "Plan Básico",
+      precio: 300,
+      aires: "2 aires",
+      gasLibras: 0,
+      mantenimientosAno: 3,
+      tarjeta: "No incluida",
+      desinstalacion: "No incluida",
+      destacado: false,
+      beneficios: [
+        "Corrección de cinta de rotor",
+        "Reparaciones eléctricas básicas",
+      ],
+    },
+    {
+      id: "esencial",
+      nombre: "Plan Esencial",
+      precio: 500,
+      aires: "3 aires",
+      gasLibras: 2,
+      mantenimientosAno: 3,
+      tarjeta: "No incluida",
+      desinstalacion: "No incluida",
+      destacado: false,
+      beneficios: [
+        "Corrección de cinta de rotor",
+        "Reparación eléctrica básica",
+        "2 libras de gas incluidas",
+      ],
+    },
+    {
+      id: "premium",
+      nombre: "Plan Premium",
+      precio: 800,
+      aires: "4-5 aires",
+      gasLibras: 3,
+      mantenimientosAno: 3,
+      tarjeta: "50% de descuento",
+      desinstalacion: "50% de descuento",
+      destacado: true,
+      beneficios: [
+        "Corrección de cinta de rotor",
+        "Reparación eléctrica básica",
+        "3 libras de gas incluidas",
+        "Reparación de tarjeta a mitad de precio",
+        "Desinstalación a mitad de precio",
+      ],
+    },
+    {
+      id: "oro",
+      nombre: "Plan Oro",
+      precio: 1000,
+      aires: "5-6 aires",
+      gasLibras: 4,
+      mantenimientosAno: 3,
+      tarjeta: "Gratis",
+      desinstalacion: "50% de descuento",
+      destacado: false,
+      beneficios: [
+        "Corrección de cinta de rotor",
+        "Reparación eléctrica básica",
+        "4 libras de gas incluidas",
+        "Reparación de tarjeta gratis",
+        "Desinstalación e instalación a mitad de precio",
+      ],
+    },
+    {
+      id: "full",
+      nombre: "Plan Full",
+      precio: 1500,
+      aires: "5-7 aires",
+      gasLibras: 5,
+      mantenimientosAno: 3,
+      tarjeta: "Gratis",
+      desinstalacion: "Gratis",
+      destacado: false,
+      beneficios: [
+        "Corrección de cinta de rotor",
+        "Reparación eléctrica básica",
+        "5 libras de gas incluidas",
+        "Reparaciones a mitad de precio",
+        "Reparación de tarjeta gratis",
+        "Desinstalación e instalación gratis",
+      ],
+    },
+  ],
+};
+
+/* ---------- Estado ---------- */
+const clonar = (obj) => JSON.parse(JSON.stringify(obj));
+
+function cargarJSON(clave, valorPorDefecto) {
+  try {
+    const crudo = localStorage.getItem(clave);
+    return crudo ? JSON.parse(crudo) : clonar(valorPorDefecto);
+  } catch {
+    return clonar(valorPorDefecto);
+  }
+}
+
+let datos = cargarJSON(CLAVE_DATOS, DATOS_ORIGINALES);
+let solicitudes = cargarJSON(CLAVE_SOLICITUDES, []);
+
+// Respaldo por si los datos guardados están incompletos o corruptos
+if (!datos || !Array.isArray(datos.planes)) datos = clonar(DATOS_ORIGINALES);
+if (!Array.isArray(solicitudes)) solicitudes = [];
+
+/* ---------- Utilidades ---------- */
+const $ = (selector, base = document) => base.querySelector(selector);
+const $$ = (selector, base = document) => [...base.querySelectorAll(selector)];
+
+const ICONO_CHECK =
+  '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10.5l4 4 8-9"/></svg>';
+
+function esc(valor) {
+  return String(valor ?? "").replace(/[&<>"']/g, (c) => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
+  }[c]));
+}
+
+function formatoPrecio(n) {
+  return "$" + Number(n || 0).toLocaleString("en-US");
+}
+
+function formatoFecha(iso) {
+  try {
+    return new Date(iso).toLocaleString("es-ES", { dateStyle: "medium", timeStyle: "short" });
+  } catch {
+    return iso;
+  }
+}
+
+function persistirDatos() {
+  localStorage.setItem(CLAVE_DATOS, JSON.stringify(datos));
+}
+
+function persistirSolicitudes() {
+  localStorage.setItem(CLAVE_SOLICITUDES, JSON.stringify(solicitudes));
+}
+
+function planPorId(id) {
+  return datos.planes.find((p) => p.id === id);
+}
+
+function slugificar(texto) {
+  return texto.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "")
+    .replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || "plan";
+}
+
+function idUnicoPara(nombre) {
+  const base = slugificar(nombre);
+  let id = base, i = 2;
+  while (planPorId(id)) { id = `${base}-${i++}`; }
+  return id;
+}
+
+function aviso(texto, tipo = "ok") {
+  const contenedor = $("#avisos");
+  const el = document.createElement("div");
+  el.className = "aviso" + (tipo === "error" ? " aviso-error" : "");
+  el.textContent = texto;
+  contenedor.appendChild(el);
+  requestAnimationFrame(() => el.classList.add("visible"));
+  setTimeout(() => {
+    el.classList.remove("visible");
+    setTimeout(() => el.remove(), 300);
+  }, 2800);
+}
+
+/* ============================================================
+   RENDERIZADO — VISTA PÚBLICA
+   ============================================================ */
+function renderMarca() {
+  document.title = `${datos.empresa} — Mantenimiento de aires acondicionados`;
+  $$(".js-marca").forEach((el) => { el.textContent = datos.empresa; });
+}
+
+function tarjetaPlan(p) {
+  const beneficios = p.beneficios
+    .map((b) => `<li>${ICONO_CHECK}<span>${esc(b)}</span></li>`)
+    .join("");
+  return `
+    <article class="plan-card${p.destacado ? " destacado" : ""}">
+      ${p.destacado ? '<span class="badge-recomendado">Recomendado</span>' : ""}
+      <h3>${esc(p.nombre)}</h3>
+      <p class="plan-precio"><span class="precio">${formatoPrecio(p.precio)}</span><span class="periodo">/año</span></p>
+      <p class="plan-aires">Cubre: ${esc(p.aires)}</p>
+      <span class="plan-visitas">${p.mantenimientosAno} mantenimientos al año</span>
+      <ul class="plan-beneficios">${beneficios}</ul>
+      <button type="button" class="btn btn-block" data-elegir="${esc(p.id)}">Elegir este plan</button>
+    </article>`;
+}
+
+function renderPlanes() {
+  const contenedor = $("#planes-grid");
+  if (!datos.planes.length) {
+    contenedor.innerHTML = '<p class="planes-vacio">No hay planes disponibles por el momento.</p>';
+    return;
+  }
+  contenedor.innerHTML = datos.planes.map(tarjetaPlan).join("");
+}
+
+function renderTabla() {
+  const contenedor = $("#tabla-comparativa");
+  if (!datos.planes.length) {
+    contenedor.innerHTML = '<p class="planes-vacio">No hay planes para comparar.</p>';
+    return;
+  }
+  const filas = [
+    ["Aires cubiertos", (p) => esc(p.aires)],
+    ["Libras de gas / año", (p) => (p.gasLibras > 0 ? `${p.gasLibras} lb` : "—")],
+    ["Reparación de tarjeta", (p) => esc(p.tarjeta)],
+    ["Desinstalación e instalación", (p) => esc(p.desinstalacion)],
+    ["Mantenimientos al año", (p) => `${p.mantenimientosAno} visitas`],
+  ];
+  let html = '<div class="tabla-scroll"><table class="tabla-comparativa"><thead><tr><th class="col-etiqueta"></th>';
+  html += datos.planes.map((p) => `
+    <th class="${p.destacado ? "col-destacada" : ""}">
+      <span class="tc-nombre">${esc(p.nombre)}</span>
+      <span class="tc-precio">${formatoPrecio(p.precio)} <small>/año</small></span>
+    </th>`).join("");
+  html += "</tr></thead><tbody>";
+  filas.forEach(([etiqueta, fn]) => {
+    html += `<tr><th class="col-etiqueta">${etiqueta}</th>`;
+    html += datos.planes.map((p) => `<td class="${p.destacado ? "col-destacada" : ""}">${fn(p)}</td>`).join("");
+    html += "</tr>";
+  });
+  html += "</tbody></table></div>";
+  contenedor.innerHTML = html;
+}
+
+function renderSelectPlanes() {
+  const select = $("#s-plan");
+  const valorActual = select.value;
+  let html = '<option value="" disabled selected>Selecciona un plan…</option>';
+  html += datos.planes.map((p) => `<option value="${esc(p.id)}">${esc(p.nombre)} — ${formatoPrecio(p.precio)}/año</option>`).join("");
+  html += '<option value="sin-decidir">Aún no lo sé</option>';
+  select.innerHTML = html;
+  if (valorActual && [...select.options].some((o) => o.value === valorActual)) {
+    select.value = valorActual;
+  }
+}
+
+function renderPublico() {
+  renderMarca();
+  renderPlanes();
+  renderTabla();
+  renderSelectPlanes();
+}
+
+/* ============================================================
+   RENDERIZADO — ADMINISTRACIÓN
+   ============================================================ */
+function renderAdminPlanes() {
+  $("#empresa-input").value = datos.empresa;
+  const contenedor = $("#admin-planes-lista");
+  if (!datos.planes.length) {
+    contenedor.innerHTML = '<p class="vacio">No hay planes. Crea el primero con «Nuevo plan».</p>';
+    return;
+  }
+  contenedor.innerHTML = datos.planes.map((p) => `
+    <div class="admin-fila">
+      <div class="admin-fila-info">
+        <strong>${esc(p.nombre)} ${p.destacado ? '<span class="chip">Recomendado</span>' : ""}</strong>
+        <span class="admin-fila-detalles">
+          ${formatoPrecio(p.precio)}/año · ${esc(p.aires)} ·
+          ${p.gasLibras > 0 ? p.gasLibras + " lb de gas" : "sin gas"} ·
+          ${p.mantenimientosAno} visitas/año · ${p.beneficios.length} beneficios
+        </span>
+      </div>
+      <div class="admin-fila-acciones">
+        <button type="button" class="btn-mini" data-editar="${esc(p.id)}">Editar</button>
+        <button type="button" class="btn-mini btn-mini-peligro" data-borrar="${esc(p.id)}">Borrar</button>
+      </div>
+    </div>`).join("");
+}
+
+function actualizarContadorSolicitudes() {
+  $("#contador-solicitudes").textContent = solicitudes.length;
+}
+
+function renderSolicitudes() {
+  actualizarContadorSolicitudes();
+  const contenedor = $("#admin-solicitudes-lista");
+  const btnVaciar = $("#btn-vaciar-solicitudes");
+  if (!solicitudes.length) {
+    contenedor.innerHTML = '<p class="vacio">Aún no hay solicitudes. Los envíos del formulario público aparecerán aquí.</p>';
+    btnVaciar.hidden = true;
+    return;
+  }
+  btnVaciar.hidden = false;
+  contenedor.innerHTML = solicitudes.map((s) => `
+    <div class="admin-fila">
+      <div class="admin-fila-info">
+        <strong>${esc(s.nombre)} <span class="chip-chip">· ${esc(s.planNombre)}</span></strong>
+        <span class="admin-fila-detalles">${esc(s.telefono)} · ${formatoFecha(s.fecha)}</span>
+        ${s.nota ? `<p class="lead-nota">“${esc(s.nota)}”</p>` : ""}
+      </div>
+    </div>`).join("");
+}
+
+function guardarCambiosDatos() {
+  persistirDatos();
+  renderPublico();
+  renderAdminPlanes();
+}
+
+/* ============================================================
+   RUTAS Y SESIÓN
+   ============================================================ */
+function aplicarRuta() {
+  const esAdmin = location.hash.startsWith("#/admin");
+  const vistaPublica = $("#vista-publica");
+  const vistaAdmin = $("#vista-admin");
+  if (esAdmin) {
+    vistaPublica.hidden = true;
+    vistaAdmin.hidden = false;
+    mostrarSegunSesion();
+    window.scrollTo(0, 0);
+  } else if (vistaPublica.hidden) {
+    vistaAdmin.hidden = true;
+    vistaPublica.hidden = false;
+    window.scrollTo(0, 0);
+  }
+}
+
+function sesionActiva() {
+  return sessionStorage.getItem(CLAVE_SESION) === "1";
+}
+
+function mostrarSegunSesion() {
+  const logueado = sesionActiva();
+  $("#admin-login").hidden = logueado;
+  $("#admin-panel").hidden = !logueado;
+  if (logueado) {
+    renderAdminPlanes();
+    renderSolicitudes();
+  }
+}
+
+/* ============================================================
+   EDITOR DE PLANES (modal)
+   ============================================================ */
+function abrirEditorPlan(id = null) {
+  const form = $("#form-plan");
+  form.reset();
+  $("#plan-error").hidden = true;
+  $("#f-id").value = "";
+  $("#modal-titulo").textContent = "Nuevo plan";
+
+  if (id) {
+    const p = planPorId(id);
+    if (!p) return;
+    $("#modal-titulo").textContent = `Editar: ${p.nombre}`;
+    $("#f-id").value = p.id;
+    $("#f-nombre").value = p.nombre;
+    $("#f-precio").value = p.precio;
+    $("#f-aires").value = p.aires;
+    $("#f-gas").value = p.gasLibras;
+    $("#f-mant").value = p.mantenimientosAno;
+    $("#f-tarjeta").value = p.tarjeta || "";
+    $("#f-desinstalacion").value = p.desinstalacion || "";
+    $("#f-beneficios").value = (p.beneficios || []).join("\n");
+    $("#f-destacado").checked = !!p.destacado;
+  }
+  $("#modal-plan").hidden = false;
+  $("#f-nombre").focus();
+}
+
+function cerrarEditorPlan() {
+  $("#modal-plan").hidden = true;
+}
+
+function errorEditor(mensaje) {
+  const el = $("#plan-error");
+  el.textContent = mensaje;
+  el.hidden = false;
+}
+
+function guardarPlanDesdeForm(evento) {
+  evento.preventDefault();
+  const idEdicion = $("#f-id").value;
+  const nombre = $("#f-nombre").value.trim();
+  const precio = Number($("#f-precio").value);
+  const aires = $("#f-aires").value.trim();
+  const beneficios = $("#f-beneficios").value.split("\n").map((b) => b.trim()).filter(Boolean);
+
+  if (nombre.length < 2) return errorEditor("Escribe el nombre del plan.");
+  if ($("#f-precio").value === "" || !Number.isFinite(precio) || precio < 0) {
+    return errorEditor("Escribe un precio válido (mayor o igual a 0).");
+  }
+  if (!aires) return errorEditor("Indica los aires cubiertos (ej. 4-5 aires).");
+  if (!beneficios.length) return errorEditor("Añade al menos un beneficio (uno por línea).");
+
+  const plan = {
+    id: idEdicion || idUnicoPara(nombre),
+    nombre,
+    precio,
+    aires,
+    gasLibras: Math.max(0, Number($("#f-gas").value) || 0),
+    mantenimientosAno: Math.max(1, Number($("#f-mant").value) || 3),
+    tarjeta: $("#f-tarjeta").value.trim() || "No incluida",
+    desinstalacion: $("#f-desinstalacion").value.trim() || "No incluida",
+    beneficios,
+    destacado: $("#f-destacado").checked,
+  };
+
+  // Solo un plan recomendado a la vez
+  if (plan.destacado) datos.planes.forEach((p) => { p.destacado = false; });
+
+  if (idEdicion) {
+    const indice = datos.planes.findIndex((p) => p.id === idEdicion);
+    if (indice >= 0) datos.planes[indice] = plan;
+  } else {
+    datos.planes.push(plan);
+  }
+
+  guardarCambiosDatos();
+  cerrarEditorPlan();
+  aviso(idEdicion ? "Plan actualizado" : "Plan creado");
+}
+
+function borrarPlan(id) {
+  const p = planPorId(id);
+  if (!p) return;
+  if (!confirm(`¿Eliminar el plan «${p.nombre}»? Esta acción no se puede deshacer.`)) return;
+  datos.planes = datos.planes.filter((item) => item.id !== id);
+  guardarCambiosDatos();
+  aviso("Plan eliminado");
+}
+
+/* ============================================================
+   FORMULARIO PÚBLICO DE SOLICITUD
+   ============================================================ */
+function manejarEnvioSolicitud(evento) {
+  evento.preventDefault();
+  const error = $("#solicitud-error");
+  const ok = $("#solicitud-ok");
+  error.hidden = true;
+  ok.hidden = true;
+
+  const nombre = $("#s-nombre").value.trim();
+  const telefonoCrudo = $("#s-telefono").value.trim();
+  const telefonoDigitos = telefonoCrudo.replace(/\D/g, "");
+  const planId = $("#s-plan").value;
+  const nota = $("#s-nota").value.trim();
+
+  const marcar = (selector, mensaje) => {
+    const campo = $(selector);
+    campo.classList.add("invalido");
+    error.textContent = mensaje;
+    error.hidden = false;
+    campo.focus();
+  };
+
+  $$("#form-solicitud .invalido").forEach((c) => c.classList.remove("invalido"));
+
+  if (nombre.length < 2) return marcar("#s-nombre", "Escribe tu nombre completo.");
+  if (telefonoDigitos.length < 7) return marcar("#s-telefono", "Escribe un teléfono válido (mínimo 7 dígitos).");
+  if (!planId) return marcar("#s-plan", "Selecciona un plan de interés.");
+
+  const plan = planPorId(planId);
+  solicitudes.unshift({
+    id: Date.now().toString(36),
+    fecha: new Date().toISOString(),
+    nombre,
+    telefono: telefonoCrudo,
+    planId: plan ? plan.id : "",
+    planNombre: plan ? plan.nombre : "Aún no lo sé",
+    nota,
+  });
+  persistirSolicitudes();
+  actualizarContadorSolicitudes();
+  evento.target.reset();
+  ok.hidden = false;
+  aviso("Solicitud guardada");
+}
+
+/* ============================================================
+   EVENTOS Y ARRANQUE
+   ============================================================ */
+function elegirPlan(id) {
+  const select = $("#s-plan");
+  if (planPorId(id)) select.value = id;
+  const seccion = $("#solicitud");
+  if (seccion.scrollIntoView) seccion.scrollIntoView({ behavior: "smooth", block: "start" });
+  const tarjeta = $("#form-solicitud");
+  tarjeta.classList.add("pulso");
+  setTimeout(() => tarjeta.classList.remove("pulso"), 1400);
+}
+
+function init() {
+  $("#anio-actual").textContent = new Date().getFullYear();
+
+  renderPublico();
+  aplicarRuta();
+  mostrarSegunSesion();
+
+  window.addEventListener("hashchange", aplicarRuta);
+
+  // Menú móvil
+  const nav = $("#nav-principal");
+  const toggle = $("#nav-toggle");
+  toggle.addEventListener("click", () => {
+    const abierta = nav.classList.toggle("abierta");
+    toggle.setAttribute("aria-expanded", String(abierta));
+  });
+  nav.addEventListener("click", (e) => {
+    if (e.target.tagName === "A") nav.classList.remove("abierta");
+  });
+
+  // Botones "Elegir este plan" (delegación)
+  $("#planes-grid").addEventListener("click", (e) => {
+    const boton = e.target.closest("[data-elegir]");
+    if (boton) elegirPlan(boton.dataset.elegir);
+  });
+
+  // Formulario público
+  $("#form-solicitud").addEventListener("submit", manejarEnvioSolicitud);
+
+  // Login admin
+  $("#form-login").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const usuario = $("#login-usuario").value.trim();
+    const clave = $("#login-clave").value;
+    if (usuario === "admin" && clave === "airecare") {
+      sessionStorage.setItem(CLAVE_SESION, "1");
+      e.target.reset();
+      $("#login-error").hidden = true;
+      mostrarSegunSesion();
+      aviso("Sesión iniciada");
+    } else {
+      $("#login-error").hidden = false;
+    }
+  });
+
+  $("#btn-logout").addEventListener("click", () => {
+    sessionStorage.removeItem(CLAVE_SESION);
+    mostrarSegunSesion();
+    aviso("Sesión cerrada");
+  });
+
+  // Pestañas del panel
+  $$(".admin-tab").forEach((boton) => {
+    boton.addEventListener("click", () => {
+      $$(".admin-tab").forEach((b) => b.classList.toggle("activa", b === boton));
+      $("#panel-planes").hidden = boton.dataset.tab !== "planes";
+      $("#panel-solicitudes").hidden = boton.dataset.tab !== "solicitudes";
+    });
+  });
+
+  // Nombre comercial
+  $("#btn-guardar-empresa").addEventListener("click", () => {
+    const valor = $("#empresa-input").value.trim();
+    if (valor.length < 2) {
+      aviso("Escribe un nombre válido", "error");
+      return;
+    }
+    datos.empresa = valor;
+    guardarCambiosDatos();
+    aviso("Nombre comercial actualizado");
+  });
+
+  // CRUD de planes
+  $("#btn-nuevo-plan").addEventListener("click", () => abrirEditorPlan());
+  $("#admin-planes-lista").addEventListener("click", (e) => {
+    const btnEditar = e.target.closest("[data-editar]");
+    const btnBorrar = e.target.closest("[data-borrar]");
+    if (btnEditar) abrirEditorPlan(btnEditar.dataset.editar);
+    if (btnBorrar) borrarPlan(btnBorrar.dataset.borrar);
+  });
+
+  $("#form-plan").addEventListener("submit", guardarPlanDesdeForm);
+  $("#btn-cancelar-plan").addEventListener("click", cerrarEditorPlan);
+  $("#modal-plan").addEventListener("click", (e) => {
+    if (e.target === e.currentTarget) cerrarEditorPlan();
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && !$("#modal-plan").hidden) cerrarEditorPlan();
+  });
+
+  // Restaurar datos originales
+  $("#btn-restaurar").addEventListener("click", () => {
+    if (!confirm("¿Restaurar los datos originales? Se perderán los planes creados y todas las ediciones.")) return;
+    datos = clonar(DATOS_ORIGINALES);
+    guardarCambiosDatos();
+    aviso("Datos originales restaurados");
+  });
+
+  // Vaciar solicitudes
+  $("#btn-vaciar-solicitudes").addEventListener("click", () => {
+    if (!solicitudes.length) return;
+    if (!confirm("¿Vaciar todas las solicitudes guardadas?")) return;
+    solicitudes = [];
+    persistirSolicitudes();
+    renderSolicitudes();
+    aviso("Solicitudes eliminadas");
+  });
+}
+
+init();
+})();
+</script>
+</body>
+</html>

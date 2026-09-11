@@ -1,0 +1,10 @@
+{
+  "name": "airecare-demo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Demo web: página pública + administración para empresa de mantenimiento de aires acondicionados (HTML/CSS/JS vanilla, sin dependencias).",
+  "scripts": {
+    "dev": "node servidor.js",
+    "start": "node servidor.js"
+  }
+}
