@@ -74,5 +74,8 @@ El botón **«Restaurar datos originales»** en el admin vuelve a cargar los 5 p
 - Los proyectos pasan por tres estados: `cotizacion` → `aprobado` → `cerrado`,
   con una lista de `cobros` (monto + fecha + nota) para pagos parciales.
 - Desde cada proyecto se puede descargar un **PDF de cotización** (con logo,
-  plan y monto) y desde cada cobro un **recibo de pago informal** en PDF —
-  se generan en el navegador con jsPDF, sin pasar por el servidor.
+  plan y monto, o una tabla de ítems con cantidad/precio si se agregan) y
+  desde cada cobro un **recibo de pago informal** en PDF — se generan en el
+  navegador con jsPDF, sin pasar por el servidor.
+- Al agregar ítems en el editor de cotización, el total se calcula solo
+  (cantidad × precio de cada ítem) y reemplaza el monto por cobrar.

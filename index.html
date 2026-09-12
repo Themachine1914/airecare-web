@@ -499,6 +499,23 @@ textarea { resize: vertical; }
 .check-linea { display: flex; align-items: center; gap: 10px; font-size: 0.9rem; }
 .check-linea input { width: auto; margin: 0; accent-color: var(--primario); }
 .modal-acciones { display: flex; justify-content: flex-end; gap: 10px; margin-top: 8px; }
+input:read-only { background: var(--fondo-2); color: var(--muted); }
+
+/* ---------- Ítems de la cotización ---------- */
+.items-cotizacion { margin: 4px 0 18px; }
+.items-cotizacion-cabecera { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 6px; }
+.items-cotizacion-ayuda { margin: 0 0 10px; font-size: 0.82rem; }
+.items-cotizacion-lista { display: grid; gap: 8px; }
+.item-cotizacion-fila {
+  display: grid; grid-template-columns: 1fr 70px 90px 90px auto;
+  gap: 8px; align-items: center;
+}
+.item-cotizacion-fila input { margin: 0; }
+.item-subtotal { font-size: 0.85rem; font-weight: 700; text-align: right; white-space: nowrap; }
+.items-cotizacion-total {
+  display: flex; justify-content: flex-end; gap: 8px; margin-top: 10px;
+  font-weight: 800; font-size: 1.05rem;
+}
 
 /* ---------- Avisos (toast) ---------- */
 .avisos { position: fixed; right: 20px; bottom: 20px; z-index: 200; display: grid; gap: 10px; }
@@ -534,6 +551,12 @@ textarea { resize: vertical; }
   .grid-2 { grid-template-columns: 1fr; }
   .admin-barra { align-items: stretch; flex-direction: column; }
   .form-card { padding: 24px; }
+  .item-cotizacion-fila { grid-template-columns: 1fr 1fr; grid-template-areas: "desc desc" "cant precio" "sub quitar"; }
+  .item-cotizacion-fila .item-descripcion { grid-area: desc; }
+  .item-cotizacion-fila .item-cantidad { grid-area: cant; }
+  .item-cotizacion-fila .item-precio { grid-area: precio; }
+  .item-cotizacion-fila .item-subtotal { grid-area: sub; }
+  .item-cotizacion-fila .btn-mini { grid-area: quitar; justify-self: end; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -917,6 +940,16 @@ textarea { resize: vertical; }
 
         <label for="py-recordatorio-fecha">Fecha de recordatorio</label>
         <input type="date" id="py-recordatorio-fecha">
+      </div>
+
+      <div class="items-cotizacion">
+        <div class="items-cotizacion-cabecera">
+          <strong>Ítems de la cotización (opcional)</strong>
+          <button type="button" class="btn-secundario" id="btn-agregar-item">+ Agregar ítem</button>
+        </div>
+        <p class="muted items-cotizacion-ayuda">Si agregas ítems, el total se calcula solo y reemplaza el monto por cobrar de arriba.</p>
+        <div id="items-cotizacion-lista" class="items-cotizacion-lista"></div>
+        <p class="items-cotizacion-total" id="items-cotizacion-total" hidden></p>
       </div>
 
       <label for="py-recordatorio-nota">Nota del recordatorio (opcional)</label>
@@ -1863,6 +1896,56 @@ function renderSelectPlanesProyecto() {
   }
 }
 
+/* ---------- Ítems de la cotización (cantidad × precio = total) ---------- */
+let contadorItems = 0;
+
+function filaItemHtml(item) {
+  const id = item?.id || `item-${++contadorItems}`;
+  const descripcion = esc(item?.descripcion || "");
+  const cantidad = item?.cantidad ?? 1;
+  const precioUnitario = item?.precioUnitario ?? "";
+  return `
+    <div class="item-cotizacion-fila" data-item-fila="${id}">
+      <input type="text" class="item-descripcion" placeholder="Ej. Instalación de aire" value="${descripcion}">
+      <input type="number" class="item-cantidad" min="0" step="0.01" placeholder="Cant." value="${cantidad}">
+      <input type="number" class="item-precio" min="0" step="0.01" placeholder="Precio" value="${precioUnitario}">
+      <span class="item-subtotal">$0</span>
+      <button type="button" class="btn-mini btn-mini-peligro" data-quitar-item="${id}">×</button>
+    </div>`;
+}
+
+function agregarFilaItem(item = null) {
+  $("#items-cotizacion-lista").insertAdjacentHTML("beforeend", filaItemHtml(item));
+  recalcularTotalItems();
+}
+
+function leerItemsDeFormulario() {
+  return $$(".item-cotizacion-fila").map((fila) => ({
+    id: fila.dataset.itemFila,
+    descripcion: fila.querySelector(".item-descripcion").value.trim(),
+    cantidad: Number(fila.querySelector(".item-cantidad").value || 0),
+    precioUnitario: Number(fila.querySelector(".item-precio").value || 0),
+  })).filter((item) => item.descripcion || item.cantidad || item.precioUnitario);
+}
+
+function recalcularTotalItems() {
+  let total = 0;
+  $$(".item-cotizacion-fila").forEach((fila) => {
+    const cantidad = Number(fila.querySelector(".item-cantidad").value || 0);
+    const precio = Number(fila.querySelector(".item-precio").value || 0);
+    const subtotal = cantidad * precio;
+    fila.querySelector(".item-subtotal").textContent = formatoPrecio(subtotal);
+    total += subtotal;
+  });
+  const hayItems = $$(".item-cotizacion-fila").length > 0;
+  const campoTotal = $("#items-cotizacion-total");
+  const campoPrecioVenta = $("#py-precio-venta");
+  campoTotal.hidden = !hayItems;
+  campoTotal.textContent = hayItems ? `Total: ${formatoPrecio(total)}` : "";
+  campoPrecioVenta.readOnly = hayItems;
+  if (hayItems) campoPrecioVenta.value = total;
+}
+
 function abrirEditorProyecto(id = null, prefill = null) {
   const form = $("#form-proyecto");
   form.reset();
@@ -1870,6 +1953,8 @@ function abrirEditorProyecto(id = null, prefill = null) {
   $("#py-id").value = "";
   $("#modal-proyecto-titulo").textContent = "Crear cotización";
   renderSelectPlanesProyecto();
+  $("#items-cotizacion-lista").innerHTML = "";
+  $("#py-precio-venta").readOnly = false;
 
   if (id) {
     const p = proyectoPorId(id);
@@ -1885,12 +1970,14 @@ function abrirEditorProyecto(id = null, prefill = null) {
     $("#py-recordatorio-fecha").value = p.recordatorioFecha || "";
     $("#py-recordatorio-nota").value = p.recordatorioNota || "";
     $("#py-notas").value = p.notas || "";
+    (p.items || []).forEach((item) => agregarFilaItem(item));
   } else if (prefill) {
     $("#py-cliente").value = prefill.cliente || "";
     $("#py-telefono").value = prefill.telefono || "";
     if (prefill.planId) $("#py-plan").value = prefill.planId;
     if (prefill.notas) $("#py-notas").value = prefill.notas;
   }
+  recalcularTotalItems();
   $("#modal-proyecto").hidden = false;
   $("#py-cliente").focus();
 }
@@ -1917,6 +2004,7 @@ function guardarProyectoDesdeForm(evento) {
   const recordatorioFecha = $("#py-recordatorio-fecha").value;
   const recordatorioNota = $("#py-recordatorio-nota").value.trim();
   const notas = $("#py-notas").value.trim();
+  const items = leerItemsDeFormulario();
 
   if (cliente.length < 2) return errorEditorProyecto("Escribe el nombre del cliente.");
   if (precioVenta < 0 || costoMateriales < 0 || costoManoObra < 0) {
@@ -1928,14 +2016,14 @@ function guardarProyectoDesdeForm(evento) {
     if (!proyecto) return;
     Object.assign(proyecto, {
       cliente, telefono, planId, precioVenta, costoMateriales, costoManoObra,
-      recordatorioFecha, recordatorioNota, notas,
+      recordatorioFecha, recordatorioNota, notas, items,
     });
     actualizarProyectoEnServidor(proyecto);
   } else {
     const nuevoProyecto = {
       id: Date.now().toString(36),
       cliente, telefono, planId, precioVenta, costoMateriales, costoManoObra,
-      recordatorioFecha, recordatorioNota, notas,
+      recordatorioFecha, recordatorioNota, notas, items,
       estado: "cotizacion",
       cobros: [],
       fechaCreacion: new Date().toISOString(),
@@ -2150,7 +2238,34 @@ async function generarCotizacionPDF(proyectoId) {
   doc.text(nombrePlanProyecto(p), margen, y);
 
   const plan = planPorId(p.planId);
-  if (plan && Array.isArray(plan.beneficios) && plan.beneficios.length) {
+  const items = Array.isArray(p.items) ? p.items : [];
+
+  if (items.length) {
+    y += 10;
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(10);
+    doc.setTextColor(90, 90, 90);
+    doc.text("Descripción", margen, y);
+    doc.text("Cant.", 132, y, { align: "right" });
+    doc.text("Precio", 161, y, { align: "right" });
+    doc.text("Subtotal", 190, y, { align: "right" });
+    y += 3;
+    doc.setDrawColor(220, 220, 220);
+    doc.line(margen, y, 190, y);
+    y += 6;
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(30, 30, 30);
+    items.forEach((item) => {
+      const cantidad = Number(item.cantidad || 0);
+      const precioUnitario = Number(item.precioUnitario || 0);
+      const lineasDesc = doc.splitTextToSize(item.descripcion || "", 100);
+      doc.text(lineasDesc, margen, y);
+      doc.text(String(cantidad), 132, y, { align: "right" });
+      doc.text(formatoPrecio(precioUnitario), 161, y, { align: "right" });
+      doc.text(formatoPrecio(cantidad * precioUnitario), 190, y, { align: "right" });
+      y += Math.max(lineasDesc.length, 1) * 5.5;
+    });
+  } else if (plan && Array.isArray(plan.beneficios) && plan.beneficios.length) {
     y += 8;
     doc.setFontSize(10);
     plan.beneficios.forEach((b) => {
@@ -2660,6 +2775,16 @@ function init() {
   $("#btn-cancelar-proyecto").addEventListener("click", cerrarEditorProyecto);
   $("#modal-proyecto").addEventListener("click", (e) => {
     if (e.target === e.currentTarget) cerrarEditorProyecto();
+  });
+
+  // Ítems de la cotización
+  $("#btn-agregar-item").addEventListener("click", () => agregarFilaItem());
+  $("#items-cotizacion-lista").addEventListener("input", recalcularTotalItems);
+  $("#items-cotizacion-lista").addEventListener("click", (e) => {
+    const btnQuitar = e.target.closest("[data-quitar-item]");
+    if (!btnQuitar) return;
+    btnQuitar.closest(".item-cotizacion-fila").remove();
+    recalcularTotalItems();
   });
 
   $("#form-cobro").addEventListener("submit", guardarCobroDesdeForm);
