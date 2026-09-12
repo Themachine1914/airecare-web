@@ -14,7 +14,9 @@ function aCamelCase(fila) {
     recordatorioNota: fila.recordatorio_nota,
     notas: fila.notas,
     estado: fila.estado,
+    cobros: fila.cobros || [],
     fechaCreacion: fila.fecha_creacion,
+    fechaAprobacion: fila.fecha_aprobacion,
     fechaCierre: fila.fecha_cierre,
   };
 }
@@ -38,12 +40,14 @@ module.exports = async (req, res) => {
     await sql`
       insert into proyectos
         (id, cliente, telefono, plan_id, precio_venta, costo_materiales, costo_mano_obra,
-         recordatorio_fecha, recordatorio_nota, notas, estado, fecha_creacion, fecha_cierre)
+         recordatorio_fecha, recordatorio_nota, notas, estado, cobros,
+         fecha_creacion, fecha_aprobacion, fecha_cierre)
       values
         (${p.id}, ${p.cliente}, ${p.telefono || ""}, ${p.planId || ""},
          ${p.precioVenta || 0}, ${p.costoMateriales || 0}, ${p.costoManoObra || 0},
          ${p.recordatorioFecha || null}, ${p.recordatorioNota || ""}, ${p.notas || ""},
-         ${p.estado || "abierto"}, ${p.fechaCreacion || new Date().toISOString()},
+         ${p.estado || "cotizacion"}, ${JSON.stringify(p.cobros || [])},
+         ${p.fechaCreacion || new Date().toISOString()}, ${p.fechaAprobacion || null},
          ${p.fechaCierre || null})
     `;
     res.status(201).json({ ok: true });
@@ -67,7 +71,9 @@ module.exports = async (req, res) => {
         recordatorio_fecha = ${p.recordatorioFecha || null},
         recordatorio_nota = ${p.recordatorioNota || ""},
         notas = ${p.notas || ""},
-        estado = ${p.estado || "abierto"},
+        estado = ${p.estado || "cotizacion"},
+        cobros = ${JSON.stringify(p.cobros || [])},
+        fecha_aprobacion = ${p.fechaAprobacion || null},
         fecha_cierre = ${p.fechaCierre || null}
       where id = ${p.id}
     `;
