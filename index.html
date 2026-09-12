@@ -19,6 +19,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/4.2.1/jspdf.umd.min.js" defer></script>
 <style>
 /* ============================================================
    AireCare — Mantenimiento de aires acondicionados
@@ -1587,7 +1588,10 @@ function htmlListaCobros(p) {
             <strong>${formatoPrecio(c.monto)}</strong>
             <span class="cobro-meta"> · ${formatoFechaSolo(c.fecha)}${c.nota ? " — " + esc(c.nota) : ""}</span>
           </span>
-          <button type="button" class="btn-mini btn-mini-peligro" data-borrar-cobro="${esc(c.id)}" data-proyecto-cobro="${esc(p.id)}">Quitar</button>
+          <span>
+            <button type="button" class="btn-mini" data-pdf-recibo="${esc(c.id)}" data-proyecto-recibo="${esc(p.id)}">Recibo PDF</button>
+            <button type="button" class="btn-mini btn-mini-peligro" data-borrar-cobro="${esc(c.id)}" data-proyecto-cobro="${esc(p.id)}">Quitar</button>
+          </span>
         </div>`).join("")}
     </div>`;
 }
@@ -1601,6 +1605,7 @@ function filaProyecto(p) {
   const estadoInfo = etiquetaEstado(p.estado);
 
   let acciones = `<button type="button" class="btn-mini" data-editar-proyecto="${esc(p.id)}">Editar</button>`;
+  acciones += `<button type="button" class="btn-mini" data-pdf-cotizacion="${esc(p.id)}">Cotización PDF</button>`;
   if (p.estado === "cotizacion") {
     acciones += `<button type="button" class="btn-mini" data-aprobar-proyecto="${esc(p.id)}">Aprobar</button>`;
   }
@@ -2052,6 +2057,235 @@ function borrarCobro(proyectoId, cobroId) {
 }
 
 /* ============================================================
+   PDF — COTIZACIÓN Y RECIBO INFORMAL
+   ============================================================ */
+let logoDataUrlCache = null;
+
+async function obtenerLogoDataUrl() {
+  if (logoDataUrlCache) return logoDataUrlCache;
+  const resp = await fetch("assets/logo-almanzar.png");
+  const blob = await resp.blob();
+  logoDataUrlCache = await new Promise((resolve, reject) => {
+    const lector = new FileReader();
+    lector.onload = () => resolve(lector.result);
+    lector.onerror = reject;
+    lector.readAsDataURL(blob);
+  });
+  return logoDataUrlCache;
+}
+
+function folio(prefijo, id) {
+  return `${prefijo}-${String(id).toUpperCase()}`;
+}
+
+function telefonoWhatsappFormateado() {
+  const n = WHATSAPP_NEGOCIO;
+  return `+${n.slice(0, 1)} (${n.slice(1, 4)}) ${n.slice(4, 7)}-${n.slice(7)}`;
+}
+
+function nombreArchivoPdf(prefijo, cliente) {
+  const limpio = cliente.trim().replace(/[^\p{L}\p{N}]+/gu, "-").replace(/^-+|-+$/g, "");
+  return `${prefijo}-${limpio || "cliente"}.pdf`;
+}
+
+async function nuevoDocumentoPdf() {
+  if (!window.jspdf) {
+    aviso("El generador de PDF aún está cargando, intenta de nuevo en un segundo", "error");
+    return null;
+  }
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit: "mm", format: "a4" });
+  const logo = await obtenerLogoDataUrl().catch(() => null);
+  if (logo) {
+    const anchoLogo = 55;
+    const altoLogo = anchoLogo * (367 / 657);
+    doc.addImage(logo, "PNG", 20, 20, anchoLogo, altoLogo);
+  }
+  return doc;
+}
+
+async function generarCotizacionPDF(proyectoId) {
+  const p = proyectoPorId(proyectoId);
+  if (!p) return;
+  const doc = await nuevoDocumentoPdf();
+  if (!doc) return;
+
+  const margen = 20;
+  let y = 20;
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(18);
+  doc.setTextColor(24, 112, 184);
+  doc.text("COTIZACIÓN", 190, y + 8, { align: "right" });
+
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(10);
+  doc.setTextColor(90, 90, 90);
+  doc.text(`N.º ${folio("COT", p.id)}`, 190, y + 15, { align: "right" });
+  doc.text(`Fecha: ${formatoFechaSolo(hoyISO())}`, 190, y + 20, { align: "right" });
+
+  y += 40;
+  doc.setDrawColor(220, 220, 220);
+  doc.line(margen, y, 190, y);
+  y += 10;
+
+  doc.setTextColor(30, 30, 30);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(11);
+  doc.text("Cliente", margen, y);
+  doc.setFont("helvetica", "normal");
+  y += 6;
+  doc.text(p.cliente, margen, y);
+  if (p.telefono) {
+    y += 6;
+    doc.text(`Tel: ${p.telefono}`, margen, y);
+  }
+
+  y += 12;
+  doc.setFont("helvetica", "bold");
+  doc.text("Servicio cotizado", margen, y);
+  y += 7;
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(12);
+  doc.text(nombrePlanProyecto(p), margen, y);
+
+  const plan = planPorId(p.planId);
+  if (plan && Array.isArray(plan.beneficios) && plan.beneficios.length) {
+    y += 8;
+    doc.setFontSize(10);
+    plan.beneficios.forEach((b) => {
+      doc.text(`•  ${b}`, margen + 2, y);
+      y += 5.5;
+    });
+  }
+
+  if (p.notas) {
+    y += 6;
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(10);
+    doc.text("Notas", margen, y);
+    y += 5.5;
+    doc.setFont("helvetica", "normal");
+    const lineas = doc.splitTextToSize(p.notas, 170);
+    doc.text(lineas, margen, y);
+    y += lineas.length * 5.5;
+  }
+
+  y += 10;
+  doc.setDrawColor(220, 220, 220);
+  doc.line(margen, y, 190, y);
+  y += 12;
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(13);
+  doc.setTextColor(24, 112, 184);
+  doc.text("Monto cotizado", margen, y);
+  doc.setFontSize(18);
+  doc.text(formatoPrecio(p.precioVenta), 190, y, { align: "right" });
+
+  y += 20;
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(9);
+  doc.setTextColor(120, 120, 120);
+  doc.text("Cotización válida por 15 días a partir de la fecha indicada.", margen, y);
+  y += 5;
+  doc.text(`Para confirmar o hacer preguntas, escríbenos por WhatsApp al ${telefonoWhatsappFormateado()}.`, margen, y);
+  y += 10;
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(60, 60, 60);
+  doc.text(`Gracias por confiar en ${datos.empresa}.`, margen, y);
+
+  doc.save(nombreArchivoPdf("Cotizacion", p.cliente));
+}
+
+async function generarReciboPDF(proyectoId, cobroId) {
+  const p = proyectoPorId(proyectoId);
+  if (!p) return;
+  const cobro = (p.cobros || []).find((c) => c.id === cobroId);
+  if (!cobro) return;
+  const doc = await nuevoDocumentoPdf();
+  if (!doc) return;
+
+  const margen = 20;
+  let y = 20;
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(18);
+  doc.setTextColor(34, 122, 85);
+  doc.text("RECIBO DE PAGO", 190, y + 8, { align: "right" });
+
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(10);
+  doc.setTextColor(90, 90, 90);
+  doc.text(`N.º ${folio("REC", cobro.id)}`, 190, y + 15, { align: "right" });
+  doc.text(`Fecha: ${formatoFechaSolo(cobro.fecha)}`, 190, y + 20, { align: "right" });
+
+  y += 40;
+  doc.setDrawColor(220, 220, 220);
+  doc.line(margen, y, 190, y);
+  y += 10;
+
+  doc.setTextColor(30, 30, 30);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(11);
+  doc.text("Recibimos de", margen, y);
+  doc.setFont("helvetica", "normal");
+  y += 6;
+  doc.text(p.cliente, margen, y);
+  if (p.telefono) {
+    y += 6;
+    doc.text(`Tel: ${p.telefono}`, margen, y);
+  }
+
+  y += 12;
+  doc.setFont("helvetica", "bold");
+  doc.text("Concepto", margen, y);
+  y += 6;
+  doc.setFont("helvetica", "normal");
+  doc.text(nombrePlanProyecto(p), margen, y);
+  if (cobro.nota) {
+    y += 6;
+    const lineas = doc.splitTextToSize(cobro.nota, 170);
+    doc.text(lineas, margen, y);
+    y += (lineas.length - 1) * 5.5;
+  }
+
+  y += 14;
+  doc.setDrawColor(220, 220, 220);
+  doc.line(margen, y, 190, y);
+  y += 12;
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(13);
+  doc.setTextColor(34, 122, 85);
+  doc.text("Monto recibido", margen, y);
+  doc.setFontSize(18);
+  doc.text(formatoPrecio(cobro.monto), 190, y, { align: "right" });
+
+  y += 14;
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(10);
+  doc.setTextColor(90, 90, 90);
+  doc.text(`Total del servicio: ${formatoPrecio(p.precioVenta)}`, margen, y);
+  y += 6;
+  doc.text(`Total cobrado a la fecha: ${formatoPrecio(cobradoProyecto(p))}`, margen, y);
+  y += 6;
+  doc.text(`Saldo pendiente: ${formatoPrecio(porCobrarProyecto(p))}`, margen, y);
+
+  y += 18;
+  doc.setFont("helvetica", "italic");
+  doc.setFontSize(9);
+  doc.setTextColor(150, 150, 150);
+  doc.text("Recibo informal, no válido como comprobante fiscal.", margen, y);
+  y += 10;
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(60, 60, 60);
+  doc.text(`${datos.empresa} · WhatsApp ${telefonoWhatsappFormateado()}`, margen, y);
+
+  doc.save(nombreArchivoPdf("Recibo", p.cliente));
+}
+
+/* ============================================================
    FORMULARIO PÚBLICO DE SOLICITUD
    ============================================================ */
 function mensajeWhatsAppSolicitud({ nombre, telefono, ubicacion, mapaUrl, planNombre, nota }) {
@@ -2405,6 +2639,8 @@ function init() {
     const btnReabrir = e.target.closest("[data-reabrir-proyecto]");
     const btnBorrar = e.target.closest("[data-borrar-proyecto]");
     const btnBorrarCobro = e.target.closest("[data-borrar-cobro]");
+    const btnPdfCotizacion = e.target.closest("[data-pdf-cotizacion]");
+    const btnPdfRecibo = e.target.closest("[data-pdf-recibo]");
     if (btnEditar) abrirEditorProyecto(btnEditar.dataset.editarProyecto);
     if (btnAprobar) aprobarProyecto(btnAprobar.dataset.aprobarProyecto);
     if (btnCobro) abrirEditorCobro(btnCobro.dataset.registrarCobro);
@@ -2413,6 +2649,10 @@ function init() {
     if (btnBorrar) borrarProyecto(btnBorrar.dataset.borrarProyecto);
     if (btnBorrarCobro) {
       borrarCobro(btnBorrarCobro.dataset.proyectoCobro, btnBorrarCobro.dataset.borrarCobro);
+    }
+    if (btnPdfCotizacion) generarCotizacionPDF(btnPdfCotizacion.dataset.pdfCotizacion);
+    if (btnPdfRecibo) {
+      generarReciboPDF(btnPdfRecibo.dataset.proyectoRecibo, btnPdfRecibo.dataset.pdfRecibo);
     }
   });
 
