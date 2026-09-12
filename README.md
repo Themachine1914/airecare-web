@@ -24,8 +24,15 @@ y abre **http://localhost:3000** (el servidor es `servidor.js`, hecho solo con N
 |---|---|
 | `airecare_datos` | Nombre comercial de la empresa y los planes (creados/editados en el admin). |
 | `airecare_solicitudes` | Leads del formulario público (nombre, teléfono, ubicación, plan, nota, fecha). Se envían también por WhatsApp al `+1 829 637 2748`. |
-| `airecare_proyectos` | Proyectos de clientes: estado (abierto/cerrado), plan activado, precio de venta, costo de materiales, costo de mano de obra y recordatorio de seguimiento. |
+| `airecare_proyectos` | Cotizaciones y proyectos: estado (`cotizacion` / `aprobado` / `cerrado`), plan, monto por cobrar, inversión (materiales + mano de obra), cobros con fecha y recordatorio de seguimiento. Los proyectos antiguos con estado `abierto` se migran a `cotizacion` al cargar. |
 | `airecare_sesion` (sessionStorage) | Sesión del admin en la pestaña actual. |
+
+### Flujo de proyectos (admin)
+
+1. **Crear cotización** — cliente, plan, monto por cobrar e inversión.
+2. **Aprobar** — pasa a proyecto aprobado; entra en el resumen económico.
+3. **Registrar cobros** — monto + fecha de cobro (pueden ser parciales).
+4. **Resumen económico** — totales de inversión, por cobrar (contratos), cobrado, pendiente y utilidad estimada sobre proyectos aprobados y cerrados.
 
 El botón **«Restaurar datos originales»** en el admin vuelve a cargar los 5 planes iniciales. Para reiniciar todo, borra las claves del sitio en las herramientas de desarrollador del navegador.
 

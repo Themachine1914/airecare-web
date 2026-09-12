@@ -423,13 +423,49 @@ textarea { resize: vertical; }
 .vacio { color: var(--muted); padding: 26px; text-align: center; border: 1px dashed var(--borde); border-radius: var(--radio-s); }
 
 /* ---------- Proyectos (cotizaciones) ---------- */
-.chip-abierto { color: var(--primario); background: rgba(29, 111, 165, 0.1); border: 1px solid rgba(29, 111, 165, 0.3); }
+.chip-cotizacion { color: var(--primario); background: rgba(29, 111, 165, 0.1); border: 1px solid rgba(29, 111, 165, 0.3); }
+.chip-aprobado { color: var(--exito); background: rgba(34, 122, 85, 0.1); border: 1px solid rgba(34, 122, 85, 0.35); }
 .chip-cerrado { color: var(--muted); background: rgba(28, 35, 51, 0.06); border: 1px solid var(--borde); }
+.chip-abierto { color: var(--primario); background: rgba(29, 111, 165, 0.1); border: 1px solid rgba(29, 111, 165, 0.3); }
 
 .proyecto-costos { display: flex; flex-wrap: wrap; gap: 4px 16px; margin-top: 2px; }
 .proyecto-costos span { white-space: nowrap; }
 .proyecto-utilidad { font-weight: 700; color: var(--exito); }
 .proyecto-utilidad.negativa { color: var(--peligro); }
+.proyecto-pendiente { font-weight: 700; color: #b35c00; }
+
+.resumen-economico {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px; margin-bottom: 20px;
+}
+.resumen-card {
+  padding: 14px 16px; border: 1px solid var(--borde); border-radius: var(--radio-s);
+  background: var(--tarjeta); display: grid; gap: 4px;
+}
+.resumen-card .etiqueta { font-size: 0.75rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
+.resumen-card .monto { font-size: 1.15rem; font-weight: 800; color: var(--texto); }
+.resumen-card.resumen-inversion .monto { color: var(--primario); }
+.resumen-card.resumen-cobrar .monto { color: #b35c00; }
+.resumen-card.resumen-cobrado .monto { color: var(--exito); }
+.resumen-card.resumen-utilidad .monto { color: var(--exito); }
+.resumen-card.resumen-utilidad .monto.negativa { color: var(--peligro); }
+
+.filtros-proyectos { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+.filtro-proyecto {
+  appearance: none; border: 1px solid var(--borde); background: var(--tarjeta); color: var(--muted);
+  padding: 7px 14px; border-radius: 999px; font-size: 0.82rem; font-weight: 600; cursor: pointer;
+}
+.filtro-proyecto:hover { color: var(--texto); border-color: rgba(29, 111, 165, 0.35); }
+.filtro-proyecto.activo { color: #fff; background: var(--primario); border-color: var(--primario); }
+
+.lista-cobros { display: grid; gap: 6px; margin-top: 8px; }
+.cobro-fila {
+  display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; justify-content: space-between;
+  padding: 8px 12px; border-radius: var(--radio-s); background: rgba(28, 35, 51, 0.03);
+  border: 1px solid var(--borde); font-size: 0.85rem;
+}
+.cobro-fila strong { font-weight: 700; }
+.cobro-meta { color: var(--muted); }
 
 .recordatorio {
   display: inline-flex; align-items: center; gap: 6px; margin-top: 6px;
@@ -785,8 +821,15 @@ textarea { resize: vertical; }
       <!-- Pestaña: proyectos -->
       <div id="panel-proyectos" class="admin-panel-seccion" hidden>
         <div class="admin-barra">
-          <p class="muted">Cotiza, abre y cierra proyectos de clientes. Registra precio de venta, costos y recordatorios de seguimiento.</p>
-          <button type="button" class="btn" id="btn-nuevo-proyecto">+ Nuevo proyecto</button>
+          <p class="muted">Crea cotizaciones, aprueba proyectos y registra cobros con fecha. El resumen muestra inversión y montos por cobrar.</p>
+          <button type="button" class="btn" id="btn-nuevo-proyecto">+ Crear cotización</button>
+        </div>
+        <div id="resumen-economico" class="resumen-economico" hidden></div>
+        <div class="filtros-proyectos" role="tablist" aria-label="Filtrar proyectos">
+          <button type="button" class="filtro-proyecto activo" data-filtro="todos">Todos</button>
+          <button type="button" class="filtro-proyecto" data-filtro="cotizacion">Cotizaciones</button>
+          <button type="button" class="filtro-proyecto" data-filtro="aprobado">Aprobados</button>
+          <button type="button" class="filtro-proyecto" data-filtro="cerrado">Cerrados</button>
         </div>
         <div id="admin-proyectos-lista" class="admin-lista"></div>
       </div>
@@ -842,10 +885,10 @@ textarea { resize: vertical; }
   </div>
 </div>
 
-<!-- ==================== MODAL: EDITOR DE PROYECTO ==================== -->
+<!-- ==================== MODAL: EDITOR DE PROYECTO / COTIZACIÓN ==================== -->
 <div class="modal-fondo" id="modal-proyecto" hidden>
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-proyecto-titulo">
-    <h3 id="modal-proyecto-titulo">Nuevo proyecto</h3>
+    <h3 id="modal-proyecto-titulo">Crear cotización</h3>
     <form id="form-proyecto" novalidate>
       <input type="hidden" id="py-id">
 
@@ -856,18 +899,18 @@ textarea { resize: vertical; }
         <label for="py-telefono">Teléfono / WhatsApp</label>
         <input type="tel" id="py-telefono" placeholder="Ej. 809 000 0000">
 
-        <label for="py-plan">Plan activado</label>
+        <label for="py-plan">Plan cotizado</label>
         <select id="py-plan">
           <option value="">Aún no decidido</option>
         </select>
 
-        <label for="py-precio-venta">Precio de venta (USD)</label>
+        <label for="py-precio-venta">Monto por cobrar / precio de venta (USD)</label>
         <input type="number" id="py-precio-venta" min="0" step="1" placeholder="800">
 
-        <label for="py-costo-materiales">Costo de materiales (USD)</label>
+        <label for="py-costo-materiales">Inversión · materiales (USD)</label>
         <input type="number" id="py-costo-materiales" min="0" step="1" placeholder="200">
 
-        <label for="py-costo-mano-obra">Costo de mano de obra (USD, opcional)</label>
+        <label for="py-costo-mano-obra">Inversión · mano de obra (USD, opcional)</label>
         <input type="number" id="py-costo-mano-obra" min="0" step="1" placeholder="0">
 
         <label for="py-recordatorio-fecha">Fecha de recordatorio</label>
@@ -877,14 +920,43 @@ textarea { resize: vertical; }
       <label for="py-recordatorio-nota">Nota del recordatorio (opcional)</label>
       <textarea id="py-recordatorio-nota" rows="2" placeholder="Ej. Llamar para confirmar próxima visita"></textarea>
 
-      <label for="py-notas">Notas del proyecto (opcional)</label>
+      <label for="py-notas">Notas de la cotización (opcional)</label>
       <textarea id="py-notas" rows="3" placeholder="Detalles del trabajo, ubicación, equipos, etc."></textarea>
 
       <p class="form-error" id="proyecto-error" hidden></p>
 
       <div class="modal-acciones">
         <button type="button" class="btn-ghost" id="btn-cancelar-proyecto">Cancelar</button>
-        <button type="submit" class="btn">Guardar proyecto</button>
+        <button type="submit" class="btn">Guardar cotización</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ==================== MODAL: REGISTRAR COBRO ==================== -->
+<div class="modal-fondo" id="modal-cobro" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-cobro-titulo">
+    <h3 id="modal-cobro-titulo">Registrar cobro</h3>
+    <form id="form-cobro" novalidate>
+      <input type="hidden" id="cobro-proyecto-id">
+      <p class="muted" id="cobro-cliente-info" style="margin-bottom: 12px;"></p>
+
+      <div class="grid-2">
+        <label for="cobro-monto">Monto cobrado (USD) *</label>
+        <input type="number" id="cobro-monto" min="0" step="1" placeholder="200">
+
+        <label for="cobro-fecha">Fecha de cobro *</label>
+        <input type="date" id="cobro-fecha">
+      </div>
+
+      <label for="cobro-nota">Nota (opcional)</label>
+      <textarea id="cobro-nota" rows="2" placeholder="Ej. Transferencia, efectivo, abono parcial"></textarea>
+
+      <p class="form-error" id="cobro-error" hidden></p>
+
+      <div class="modal-acciones">
+        <button type="button" class="btn-ghost" id="btn-cancelar-cobro">Cancelar</button>
+        <button type="submit" class="btn">Guardar cobro</button>
       </div>
     </form>
   </div>
@@ -1016,11 +1088,27 @@ function cargarJSON(clave, valorPorDefecto) {
 let datos = cargarJSON(CLAVE_DATOS, DATOS_ORIGINALES);
 let solicitudes = cargarJSON(CLAVE_SOLICITUDES, []);
 let proyectos = cargarJSON(CLAVE_PROYECTOS, []);
+let filtroProyectos = "todos";
 
 // Respaldo por si los datos guardados están incompletos o corruptos
 if (!datos || !Array.isArray(datos.planes)) datos = clonar(DATOS_ORIGINALES);
 if (!Array.isArray(solicitudes)) solicitudes = [];
 if (!Array.isArray(proyectos)) proyectos = [];
+
+/* Normaliza proyectos antiguos (abierto → cotización) y asegura lista de cobros */
+function normalizarProyecto(p) {
+  const estado = p.estado === "abierto" ? "cotizacion" : (p.estado || "cotizacion");
+  return {
+    ...p,
+    estado,
+    cobros: Array.isArray(p.cobros) ? p.cobros : [],
+    fechaAprobacion: p.fechaAprobacion || "",
+  };
+}
+proyectos = proyectos.map(normalizarProyecto);
+try {
+  localStorage.setItem(CLAVE_PROYECTOS, JSON.stringify(proyectos));
+} catch { /* ignore quota / private mode */ }
 
 /* ---------- Utilidades ---------- */
 const $ = (selector, base = document) => base.querySelector(selector);
@@ -1318,13 +1406,13 @@ function renderSolicitudes() {
       </div>
       <div class="admin-fila-acciones">
         <a class="btn-mini" href="${esc(enlaceWhatsAppSolicitud(s))}" target="_blank" rel="noopener noreferrer">WhatsApp</a>
-        <button type="button" class="btn-mini" data-crear-proyecto="${esc(s.id)}">Crear proyecto</button>
+        <button type="button" class="btn-mini" data-crear-proyecto="${esc(s.id)}">Crear cotización</button>
       </div>
     </div>`).join("");
 }
 
 /* ============================================================
-   RENDERIZADO — PROYECTOS (COTIZACIONES)
+   RENDERIZADO — PROYECTOS (COTIZACIONES, COBROS, RESUMEN)
    ============================================================ */
 function nombrePlanProyecto(p) {
   if (!p.planId) return "Sin plan asignado";
@@ -1332,8 +1420,30 @@ function nombrePlanProyecto(p) {
   return plan ? plan.nombre : "Plan eliminado";
 }
 
+function inversionProyecto(p) {
+  return Number(p.costoMateriales || 0) + Number(p.costoManoObra || 0);
+}
+
+function cobradoProyecto(p) {
+  return (p.cobros || []).reduce((suma, c) => suma + Number(c.monto || 0), 0);
+}
+
+function porCobrarProyecto(p) {
+  return Math.max(0, Number(p.precioVenta || 0) - cobradoProyecto(p));
+}
+
+function utilidadProyecto(p) {
+  return Number(p.precioVenta || 0) - inversionProyecto(p);
+}
+
+function etiquetaEstado(estado) {
+  if (estado === "aprobado") return { texto: "Aprobado", clase: "chip-aprobado" };
+  if (estado === "cerrado") return { texto: "Cerrado", clase: "chip-cerrado" };
+  return { texto: "Cotización", clase: "chip-cotizacion" };
+}
+
 function recordatorioVencido(p) {
-  return p.estado === "abierto" && !!p.recordatorioFecha && p.recordatorioFecha <= hoyISO();
+  return p.estado !== "cerrado" && !!p.recordatorioFecha && p.recordatorioFecha <= hoyISO();
 }
 
 function actualizarContadorRecordatorios() {
@@ -1343,26 +1453,103 @@ function actualizarContadorRecordatorios() {
   el.hidden = pendientes === 0;
 }
 
+function renderResumenEconomico() {
+  const contenedor = $("#resumen-economico");
+  const aprobados = proyectos.filter((p) => p.estado === "aprobado" || p.estado === "cerrado");
+  if (!aprobados.length) {
+    contenedor.hidden = true;
+    contenedor.innerHTML = "";
+    return;
+  }
+
+  const totalInversion = aprobados.reduce((s, p) => s + inversionProyecto(p), 0);
+  const totalPorCobrarContrato = aprobados.reduce((s, p) => s + Number(p.precioVenta || 0), 0);
+  const totalCobrado = aprobados.reduce((s, p) => s + cobradoProyecto(p), 0);
+  const totalPendiente = aprobados.reduce((s, p) => s + porCobrarProyecto(p), 0);
+  const totalUtilidad = aprobados.reduce((s, p) => s + utilidadProyecto(p), 0);
+
+  contenedor.hidden = false;
+  contenedor.innerHTML = `
+    <div class="resumen-card resumen-inversion">
+      <span class="etiqueta">Inversión</span>
+      <span class="monto">${formatoPrecio(totalInversion)}</span>
+    </div>
+    <div class="resumen-card resumen-cobrar">
+      <span class="etiqueta">Por cobrar (contratos)</span>
+      <span class="monto">${formatoPrecio(totalPorCobrarContrato)}</span>
+    </div>
+    <div class="resumen-card resumen-cobrado">
+      <span class="etiqueta">Cobrado</span>
+      <span class="monto">${formatoPrecio(totalCobrado)}</span>
+    </div>
+    <div class="resumen-card resumen-cobrar">
+      <span class="etiqueta">Pendiente de cobro</span>
+      <span class="monto">${formatoPrecio(totalPendiente)}</span>
+    </div>
+    <div class="resumen-card resumen-utilidad">
+      <span class="etiqueta">Utilidad estimada</span>
+      <span class="monto${totalUtilidad < 0 ? " negativa" : ""}">${formatoPrecio(totalUtilidad)}</span>
+    </div>`;
+}
+
+function htmlListaCobros(p) {
+  const cobros = [...(p.cobros || [])].sort((a, b) => (b.fecha || "").localeCompare(a.fecha || ""));
+  if (!cobros.length) return "";
+  return `
+    <div class="lista-cobros">
+      ${cobros.map((c) => `
+        <div class="cobro-fila">
+          <span>
+            <strong>${formatoPrecio(c.monto)}</strong>
+            <span class="cobro-meta"> · ${formatoFechaSolo(c.fecha)}${c.nota ? " — " + esc(c.nota) : ""}</span>
+          </span>
+          <button type="button" class="btn-mini btn-mini-peligro" data-borrar-cobro="${esc(c.id)}" data-proyecto-cobro="${esc(p.id)}">Quitar</button>
+        </div>`).join("")}
+    </div>`;
+}
+
 function filaProyecto(p) {
-  const utilidad = Number(p.precioVenta || 0) - Number(p.costoMateriales || 0) - Number(p.costoManoObra || 0);
+  const inversion = inversionProyecto(p);
+  const cobrado = cobradoProyecto(p);
+  const porCobrar = porCobrarProyecto(p);
+  const utilidad = utilidadProyecto(p);
   const vencido = recordatorioVencido(p);
+  const estadoInfo = etiquetaEstado(p.estado);
+
+  let acciones = `<button type="button" class="btn-mini" data-editar-proyecto="${esc(p.id)}">Editar</button>`;
+  if (p.estado === "cotizacion") {
+    acciones += `<button type="button" class="btn-mini" data-aprobar-proyecto="${esc(p.id)}">Aprobar</button>`;
+  }
+  if (p.estado === "aprobado" || p.estado === "cerrado") {
+    acciones += `<button type="button" class="btn-mini" data-registrar-cobro="${esc(p.id)}">Registrar cobro</button>`;
+  }
+  if (p.estado === "aprobado") {
+    acciones += `<button type="button" class="btn-mini" data-cerrar-proyecto="${esc(p.id)}">Cerrar</button>`;
+  } else if (p.estado === "cerrado") {
+    acciones += `<button type="button" class="btn-mini" data-reabrir-proyecto="${esc(p.id)}">Reabrir</button>`;
+  }
+  acciones += `<button type="button" class="btn-mini btn-mini-peligro" data-borrar-proyecto="${esc(p.id)}">Borrar</button>`;
+
   return `
     <div class="admin-fila${vencido ? " recordatorio-vencido" : ""}">
       <div class="admin-fila-info">
         <strong>
           ${esc(p.cliente)}
-          <span class="chip ${p.estado === "abierto" ? "chip-abierto" : "chip-cerrado"}">${p.estado === "abierto" ? "Abierto" : "Cerrado"}</span>
+          <span class="chip ${estadoInfo.clase}">${estadoInfo.texto}</span>
         </strong>
         <span class="admin-fila-detalles">
           ${p.telefono ? esc(p.telefono) + " · " : ""}${esc(nombrePlanProyecto(p))} · creado ${formatoFecha(p.fechaCreacion)}
+          ${p.fechaAprobacion ? " · aprobado " + formatoFecha(p.fechaAprobacion) : ""}
           ${p.estado === "cerrado" && p.fechaCierre ? " · cerrado " + formatoFecha(p.fechaCierre) : ""}
         </span>
         <div class="proyecto-costos admin-fila-detalles">
-          <span>Venta: ${formatoPrecio(p.precioVenta)}</span>
-          <span>Materiales: ${formatoPrecio(p.costoMateriales)}</span>
-          ${p.costoManoObra ? `<span>Mano de obra: ${formatoPrecio(p.costoManoObra)}</span>` : ""}
+          <span>Por cobrar: ${formatoPrecio(p.precioVenta)}</span>
+          <span>Inversión: ${formatoPrecio(inversion)}</span>
+          ${p.estado !== "cotizacion" ? `<span>Cobrado: ${formatoPrecio(cobrado)}</span>` : ""}
+          ${p.estado !== "cotizacion" ? `<span class="proyecto-pendiente">Pendiente: ${formatoPrecio(porCobrar)}</span>` : ""}
           <span class="proyecto-utilidad${utilidad < 0 ? " negativa" : ""}">Utilidad: ${formatoPrecio(utilidad)}</span>
         </div>
+        ${htmlListaCobros(p)}
         ${p.recordatorioFecha ? `
           <span class="recordatorio">
             🔔 ${formatoFechaSolo(p.recordatorioFecha)}${p.recordatorioNota ? " — " + esc(p.recordatorioNota) : ""}
@@ -1370,25 +1557,42 @@ function filaProyecto(p) {
         ${p.notas ? `<p class="lead-nota">“${esc(p.notas)}”</p>` : ""}
       </div>
       <div class="admin-fila-acciones">
-        <button type="button" class="btn-mini" data-editar-proyecto="${esc(p.id)}">Editar</button>
-        ${p.estado === "abierto"
-          ? `<button type="button" class="btn-mini" data-cerrar-proyecto="${esc(p.id)}">Cerrar proyecto</button>`
-          : `<button type="button" class="btn-mini" data-reabrir-proyecto="${esc(p.id)}">Reabrir</button>`}
-        <button type="button" class="btn-mini btn-mini-peligro" data-borrar-proyecto="${esc(p.id)}">Borrar</button>
+        ${acciones}
       </div>
     </div>`;
 }
 
+function proyectosFiltrados() {
+  if (filtroProyectos === "todos") return [...proyectos];
+  return proyectos.filter((p) => p.estado === filtroProyectos);
+}
+
 function renderAdminProyectos() {
   actualizarContadorRecordatorios();
+  renderResumenEconomico();
+  $$(".filtro-proyecto").forEach((btn) => {
+    btn.classList.toggle("activo", btn.dataset.filtro === filtroProyectos);
+  });
+
   const contenedor = $("#admin-proyectos-lista");
+  const lista = proyectosFiltrados();
   if (!proyectos.length) {
-    contenedor.innerHTML = '<p class="vacio">Aún no hay proyectos. Crea uno con «Nuevo proyecto» o desde una solicitud.</p>';
+    contenedor.innerHTML = '<p class="vacio">Aún no hay cotizaciones. Crea una con «Crear cotización» o desde una solicitud.</p>';
     return;
   }
-  const ordenados = [...proyectos].sort((a, b) => {
-    const va = recordatorioVencido(a) ? 0 : a.estado === "abierto" ? 1 : 2;
-    const vb = recordatorioVencido(b) ? 0 : b.estado === "abierto" ? 1 : 2;
+  if (!lista.length) {
+    contenedor.innerHTML = '<p class="vacio">No hay proyectos en este filtro.</p>';
+    return;
+  }
+  const ordenados = lista.sort((a, b) => {
+    const peso = (p) => {
+      if (recordatorioVencido(p)) return 0;
+      if (p.estado === "cotizacion") return 1;
+      if (p.estado === "aprobado") return 2;
+      return 3;
+    };
+    const va = peso(a);
+    const vb = peso(b);
     if (va !== vb) return va - vb;
     return b.fechaCreacion.localeCompare(a.fechaCreacion);
   });
@@ -1546,7 +1750,7 @@ function borrarPlan(id) {
 }
 
 /* ============================================================
-   EDITOR DE PROYECTOS (modal) — cotización, apertura y cierre
+   EDITOR DE PROYECTOS / COTIZACIONES Y COBROS
    ============================================================ */
 function renderSelectPlanesProyecto() {
   const select = $("#py-plan");
@@ -1564,7 +1768,7 @@ function abrirEditorProyecto(id = null, prefill = null) {
   form.reset();
   $("#proyecto-error").hidden = true;
   $("#py-id").value = "";
-  $("#modal-proyecto-titulo").textContent = "Nuevo proyecto";
+  $("#modal-proyecto-titulo").textContent = "Crear cotización";
   renderSelectPlanesProyecto();
 
   if (id) {
@@ -1631,8 +1835,10 @@ function guardarProyectoDesdeForm(evento) {
       id: Date.now().toString(36),
       cliente, telefono, planId, precioVenta, costoMateriales, costoManoObra,
       recordatorioFecha, recordatorioNota, notas,
-      estado: "abierto",
+      estado: "cotizacion",
+      cobros: [],
       fechaCreacion: new Date().toISOString(),
+      fechaAprobacion: "",
       fechaCierre: "",
     });
   }
@@ -1640,7 +1846,17 @@ function guardarProyectoDesdeForm(evento) {
   persistirProyectos();
   renderAdminProyectos();
   cerrarEditorProyecto();
-  aviso(idEdicion ? "Proyecto actualizado" : "Proyecto creado");
+  aviso(idEdicion ? "Cotización actualizada" : "Cotización creada");
+}
+
+function aprobarProyecto(id) {
+  const p = proyectoPorId(id);
+  if (!p || p.estado !== "cotizacion") return;
+  p.estado = "aprobado";
+  p.fechaAprobacion = new Date().toISOString();
+  persistirProyectos();
+  renderAdminProyectos();
+  aviso("Proyecto aprobado");
 }
 
 function cerrarProyecto(id) {
@@ -1656,21 +1872,86 @@ function cerrarProyecto(id) {
 function reabrirProyecto(id) {
   const p = proyectoPorId(id);
   if (!p) return;
-  p.estado = "abierto";
+  p.estado = "aprobado";
   p.fechaCierre = "";
+  if (!p.fechaAprobacion) p.fechaAprobacion = new Date().toISOString();
   persistirProyectos();
   renderAdminProyectos();
-  aviso("Proyecto reabierto");
+  aviso("Proyecto reabierto como aprobado");
 }
 
 function borrarProyecto(id) {
   const p = proyectoPorId(id);
   if (!p) return;
-  if (!confirm(`¿Eliminar el proyecto de «${p.cliente}»? Esta acción no se puede deshacer.`)) return;
+  if (!confirm(`¿Eliminar la cotización/proyecto de «${p.cliente}»? Esta acción no se puede deshacer.`)) return;
   proyectos = proyectos.filter((item) => item.id !== id);
   persistirProyectos();
   renderAdminProyectos();
   aviso("Proyecto eliminado");
+}
+
+function abrirEditorCobro(proyectoId) {
+  const p = proyectoPorId(proyectoId);
+  if (!p) return;
+  $("#form-cobro").reset();
+  $("#cobro-error").hidden = true;
+  $("#cobro-proyecto-id").value = p.id;
+  const pendiente = porCobrarProyecto(p);
+  $("#cobro-cliente-info").textContent =
+    `${p.cliente} · pendiente ${formatoPrecio(pendiente)} de ${formatoPrecio(p.precioVenta)}`;
+  $("#cobro-fecha").value = hoyISO();
+  if (pendiente > 0) $("#cobro-monto").value = pendiente;
+  $("#modal-cobro").hidden = false;
+  $("#cobro-monto").focus();
+}
+
+function cerrarEditorCobro() {
+  $("#modal-cobro").hidden = true;
+}
+
+function errorEditorCobro(mensaje) {
+  const el = $("#cobro-error");
+  el.textContent = mensaje;
+  el.hidden = false;
+}
+
+function guardarCobroDesdeForm(evento) {
+  evento.preventDefault();
+  const proyectoId = $("#cobro-proyecto-id").value;
+  const p = proyectoPorId(proyectoId);
+  if (!p) return;
+
+  const monto = Number($("#cobro-monto").value);
+  const fecha = $("#cobro-fecha").value;
+  const nota = $("#cobro-nota").value.trim();
+
+  if (!Number.isFinite(monto) || monto <= 0) {
+    return errorEditorCobro("Escribe un monto de cobro válido (mayor que 0).");
+  }
+  if (!fecha) return errorEditorCobro("Indica la fecha de cobro.");
+
+  if (!Array.isArray(p.cobros)) p.cobros = [];
+  p.cobros.push({
+    id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+    monto,
+    fecha,
+    nota,
+  });
+
+  persistirProyectos();
+  renderAdminProyectos();
+  cerrarEditorCobro();
+  aviso("Cobro registrado");
+}
+
+function borrarCobro(proyectoId, cobroId) {
+  const p = proyectoPorId(proyectoId);
+  if (!p) return;
+  if (!confirm("¿Eliminar este cobro?")) return;
+  p.cobros = (p.cobros || []).filter((c) => c.id !== cobroId);
+  persistirProyectos();
+  renderAdminProyectos();
+  aviso("Cobro eliminado");
 }
 
 /* ============================================================
@@ -1921,6 +2202,14 @@ function init() {
     });
   });
 
+  // Filtros de proyectos
+  $$(".filtro-proyecto").forEach((boton) => {
+    boton.addEventListener("click", () => {
+      filtroProyectos = boton.dataset.filtro || "todos";
+      renderAdminProyectos();
+    });
+  });
+
   // Nombre comercial
   $("#btn-guardar-empresa").addEventListener("click", () => {
     const valor = $("#empresa-input").value.trim();
@@ -1958,6 +2247,7 @@ function init() {
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape" && !$("#modal-plan").hidden) cerrarEditorPlan();
     if (e.key === "Escape" && !$("#modal-proyecto").hidden) cerrarEditorProyecto();
+    if (e.key === "Escape" && !$("#modal-cobro").hidden) cerrarEditorCobro();
   });
 
   // Restaurar datos originales
@@ -1996,23 +2286,37 @@ function init() {
     });
   });
 
-  // CRUD de proyectos
+  // CRUD de proyectos / cotizaciones / cobros
   $("#btn-nuevo-proyecto").addEventListener("click", () => abrirEditorProyecto());
   $("#admin-proyectos-lista").addEventListener("click", (e) => {
     const btnEditar = e.target.closest("[data-editar-proyecto]");
+    const btnAprobar = e.target.closest("[data-aprobar-proyecto]");
+    const btnCobro = e.target.closest("[data-registrar-cobro]");
     const btnCerrar = e.target.closest("[data-cerrar-proyecto]");
     const btnReabrir = e.target.closest("[data-reabrir-proyecto]");
     const btnBorrar = e.target.closest("[data-borrar-proyecto]");
+    const btnBorrarCobro = e.target.closest("[data-borrar-cobro]");
     if (btnEditar) abrirEditorProyecto(btnEditar.dataset.editarProyecto);
+    if (btnAprobar) aprobarProyecto(btnAprobar.dataset.aprobarProyecto);
+    if (btnCobro) abrirEditorCobro(btnCobro.dataset.registrarCobro);
     if (btnCerrar) cerrarProyecto(btnCerrar.dataset.cerrarProyecto);
     if (btnReabrir) reabrirProyecto(btnReabrir.dataset.reabrirProyecto);
     if (btnBorrar) borrarProyecto(btnBorrar.dataset.borrarProyecto);
+    if (btnBorrarCobro) {
+      borrarCobro(btnBorrarCobro.dataset.proyectoCobro, btnBorrarCobro.dataset.borrarCobro);
+    }
   });
 
   $("#form-proyecto").addEventListener("submit", guardarProyectoDesdeForm);
   $("#btn-cancelar-proyecto").addEventListener("click", cerrarEditorProyecto);
   $("#modal-proyecto").addEventListener("click", (e) => {
     if (e.target === e.currentTarget) cerrarEditorProyecto();
+  });
+
+  $("#form-cobro").addEventListener("submit", guardarCobroDesdeForm);
+  $("#btn-cancelar-cobro").addEventListener("click", cerrarEditorCobro);
+  $("#modal-cobro").addEventListener("click", (e) => {
+    if (e.target === e.currentTarget) cerrarEditorCobro();
   });
 }
 
