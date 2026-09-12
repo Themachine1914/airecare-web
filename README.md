@@ -1,36 +1,64 @@
-# Almanzar Multiservicios — Demo web (AireCare)
+# Almanzar Multiservicios — AireCare
 
-Demo de una empresa de mantenimiento de aires acondicionados: página pública con planes + panel de administración. Todo en **un solo `index.html`** (HTML + CSS + JS vanilla), sin dependencias ni paso de build. Logos en `assets/`.
+Sitio de una empresa de mantenimiento de aires acondicionados: página
+pública con planes + panel de administración con CRM de solicitudes y
+proyectos. Frontend en un solo `index.html` (HTML + CSS + JS vanilla, sin
+build), backend como Vercel Functions en `api/` con base de datos Postgres
+(Neon, vía Vercel Marketplace).
 
-## Cómo correrlo
+## Arquitectura
+
+- `index.html` — toda la UI (portada pública + panel de admin) y la lógica
+  del cliente.
+- `api/empresa.js` — `GET` público (nombre + planes), `PUT` de admin.
+- `api/solicitudes.js` — `POST` público (formulario de contacto), `GET`/`DELETE` de admin.
+- `api/proyectos.js` — CRUD de admin para el seguimiento de proyectos/clientes.
+- `api/login.js` — valida usuario/contraseña contra variables de entorno y
+  devuelve un token firmado (HMAC) válido por 12 horas.
+- Base de datos: 3 tablas (`empresa`, `solicitudes`, `proyectos`) en Neon
+  Postgres, conectadas al proyecto de Vercel.
+
+## Variables de entorno (Vercel)
+
+| Variable | Uso |
+|---|---|
+| `DATABASE_URL` | Inyectada automáticamente por la integración de Neon. |
+| `ADMIN_USUARIO` | Usuario para entrar al panel de admin. |
+| `ADMIN_CLAVE` | Contraseña del panel de admin. |
+| `ADMIN_SECRET` | Clave para firmar los tokens de sesión del admin. |
+
+## Cómo correrlo localmente
+
+El stack completo (con API y base de datos) requiere el CLI de Vercel:
 
 ```bash
-cd airecare-demo
+vercel env pull .env.local   # trae las variables del proyecto en Vercel
+vercel dev
+```
+
+y abre **http://localhost:3000**.
+
+Si solo necesitas ver la portada estática (sin `/api`, sin login funcional):
+
+```bash
 npm run dev
 ```
 
-y abre **http://localhost:3000** (el servidor es `servidor.js`, hecho solo con Node — sin instalar dependencias).
-
-**Otras formas:** doble clic en `index.html` (funciona sin servidor), o `npx serve .`, o `python3 -m http.server 8080`.
+(usa `servidor.js`, un servidor Node sin dependencias que solo sirve archivos).
 
 ## Acceso a administración
 
-- Desde el enlace **«Acceso admin»** en el pie de página, o abre directamente `#/admin` (ej. `http://localhost:8080/#/admin`).
-- **Usuario:** `admin` · **Contraseña:** `airecare` (se muestran en la propia pantalla de login).
-
-## Qué se guarda en localStorage
-
-| Clave | Contenido |
-|---|---|
-| `airecare_datos` | Nombre comercial de la empresa y los planes (creados/editados en el admin). |
-| `airecare_solicitudes` | Leads del formulario público (nombre, teléfono, ubicación, plan, nota, fecha). Se envían también por WhatsApp al `+1 829 637 2748`. |
-| `airecare_proyectos` | Proyectos de clientes: estado (abierto/cerrado), plan activado, precio de venta, costo de materiales, costo de mano de obra y recordatorio de seguimiento. |
-| `airecare_sesion` (sessionStorage) | Sesión del admin en la pestaña actual. |
-
-El botón **«Restaurar datos originales»** en el admin vuelve a cargar los 5 planes iniciales. Para reiniciar todo, borra las claves del sitio en las herramientas de desarrollador del navegador.
+Desde el enlace **«Acceso admin»** en el pie de página, o abre directamente
+`#/admin`. Las credenciales están en las variables de entorno del proyecto
+en Vercel (`ADMIN_USUARIO` / `ADMIN_CLAVE`), no en el código.
 
 ## Notas
 
-- Portada y admin leen la **misma fuente de datos**: cualquier cambio en el admin se refleja al instante en la portada.
-- Todos los planes son **suscripción mensual** e incluyen **2 o 3 mantenimientos al año según necesidad** (el campo es editable por plan en el admin).
-- El formulario público **abre WhatsApp** con los datos y también guarda la solicitud en localStorage para verla en el admin.
+- Portada y admin leen la **misma fuente de datos** desde el servidor:
+  cualquier cambio en el admin se refleja en la portada, y cualquier
+  solicitud enviada desde el celular de un cliente aparece en el panel de
+  admin sin importar desde qué dispositivo se abra.
+- Todos los planes son **suscripción mensual** e incluyen **2 o 3
+  mantenimientos al año según necesidad** (editable por plan en el admin).
+- El formulario público **abre WhatsApp** con los datos de la solicitud y
+  también la guarda en la base de datos para verla en el admin.

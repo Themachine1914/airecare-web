@@ -1,5 +1,7 @@
-/* Servidor estático de desarrollo para el demo AireCare.
-   Sin dependencias: solo Node (http/fs/path). Uso: npm run dev */
+/* Servidor estático de desarrollo para AireCare.
+   Sin dependencias: solo Node (http/fs/path). Uso: npm run dev
+   Solo sirve archivos estáticos: no expone /api. Para probar el flujo
+   completo (login, solicitudes, proyectos) usa `vercel dev` en su lugar. */
 const http = require("http");
 const fs = require("fs");
 const path = require("path");
@@ -53,8 +55,8 @@ const servidor = http.createServer((req, res) => {
 });
 
 servidor.listen(PUERTO, () => {
-  console.log("\n  AireCare demo listo en:  http://localhost:" + PUERTO);
-  console.log("  Administración:          http://localhost:" + PUERTO + "/#/admin");
-  console.log("  Credenciales:            admin / airecare");
+  console.log("\n  AireCare listo en:  http://localhost:" + PUERTO);
+  console.log("  Administración:     http://localhost:" + PUERTO + "/#/admin");
+  console.log("  (Solo estáticos; usa `vercel dev` para login y datos reales)");
   console.log("\n  Ctrl+C para detener.\n");
 });

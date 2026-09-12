@@ -21,7 +21,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 /* ============================================================
-   AireCare — Demo: mantenimiento de aires acondicionados
+   AireCare — Mantenimiento de aires acondicionados
    Estética HVAC moderna: fondo oscuro, acentos cian / verde hielo
    ============================================================ */
 :root {
@@ -695,14 +695,12 @@ textarea { resize: vertical; }
     <!-- Login -->
     <section id="admin-login" class="login-caja">
       <h2>Acceso de administración</h2>
-      <p class="muted">Demo: usa estas credenciales para entrar.</p>
-      <p class="credenciales">Usuario: <code>admin</code> · Contraseña: <code>airecare</code></p>
       <form id="form-login" novalidate>
         <label for="login-usuario">Usuario</label>
-        <input type="text" id="login-usuario" autocomplete="username" placeholder="admin">
+        <input type="text" id="login-usuario" autocomplete="username">
 
         <label for="login-clave">Contraseña</label>
-        <input type="password" id="login-clave" autocomplete="current-password" placeholder="airecare">
+        <input type="password" id="login-clave" autocomplete="current-password">
 
         <p class="form-error" id="login-error" hidden>Usuario o contraseña incorrectos.</p>
         <button type="submit" class="btn btn-block">Entrar</button>
@@ -776,7 +774,7 @@ textarea { resize: vertical; }
       <!-- Pestaña: solicitudes -->
       <div id="panel-solicitudes" class="admin-panel-seccion" hidden>
         <div class="admin-barra">
-          <p class="muted">Solicitudes enviadas desde el formulario público. Se guardan solo en este navegador (localStorage).</p>
+          <p class="muted">Solicitudes enviadas desde el formulario público.</p>
           <button type="button" class="btn-ghost btn-peligro-ghost" id="btn-vaciar-solicitudes">Vaciar solicitudes</button>
         </div>
         <div id="admin-solicitudes-lista" class="admin-lista"></div>
@@ -894,18 +892,16 @@ textarea { resize: vertical; }
 
 <script>
 /* ============================================================
-   AireCare — Lógica de la aplicación (demo sin backend)
+   AireCare — Lógica de la aplicación
    - Una sola fuente de datos (`datos`) compartida por portada y admin
-   - Persistencia en localStorage
+   - Persistencia en el servidor (API + Postgres), ver carpeta api/
    ============================================================ */
 (() => {
 "use strict";
 
 /* ---------- Constantes ---------- */
-const CLAVE_DATOS = "airecare_datos";
-const CLAVE_SOLICITUDES = "airecare_solicitudes";
-const CLAVE_PROYECTOS = "airecare_proyectos";
 const CLAVE_SESION = "airecare_sesion";
+const CLAVE_TOKEN = "airecare_token";
 const CLAVE_APP_PORTADA = "airecare_app_portada";
 const WHATSAPP_NEGOCIO = "18296372748";
 
@@ -1004,23 +1000,12 @@ const DATOS_ORIGINALES = {
 /* ---------- Estado ---------- */
 const clonar = (obj) => JSON.parse(JSON.stringify(obj));
 
-function cargarJSON(clave, valorPorDefecto) {
-  try {
-    const crudo = localStorage.getItem(clave);
-    return crudo ? JSON.parse(crudo) : clonar(valorPorDefecto);
-  } catch {
-    return clonar(valorPorDefecto);
-  }
-}
-
-let datos = cargarJSON(CLAVE_DATOS, DATOS_ORIGINALES);
-let solicitudes = cargarJSON(CLAVE_SOLICITUDES, []);
-let proyectos = cargarJSON(CLAVE_PROYECTOS, []);
-
-// Respaldo por si los datos guardados están incompletos o corruptos
-if (!datos || !Array.isArray(datos.planes)) datos = clonar(DATOS_ORIGINALES);
-if (!Array.isArray(solicitudes)) solicitudes = [];
-if (!Array.isArray(proyectos)) proyectos = [];
+// Pintado instantáneo con los planes por defecto; se refrescan desde el
+// servidor en cuanto responde /api/empresa (ver cargarEmpresaDesdeServidor).
+let datos = clonar(DATOS_ORIGINALES);
+let solicitudes = [];
+let proyectos = [];
+let tokenAdmin = sessionStorage.getItem(CLAVE_TOKEN) || "";
 
 /* ---------- Utilidades ---------- */
 const $ = (selector, base = document) => base.querySelector(selector);
@@ -1061,16 +1046,107 @@ function hoyISO() {
   return local.toISOString().slice(0, 10);
 }
 
-function persistirDatos() {
-  localStorage.setItem(CLAVE_DATOS, JSON.stringify(datos));
+function encabezadosAdmin(extra) {
+  return Object.assign({ Authorization: `Bearer ${tokenAdmin}` }, extra);
 }
 
-function persistirSolicitudes() {
-  localStorage.setItem(CLAVE_SOLICITUDES, JSON.stringify(solicitudes));
+async function cargarEmpresaDesdeServidor() {
+  try {
+    const resp = await fetch("/api/empresa");
+    if (!resp.ok) return;
+    const remoto = await resp.json();
+    if (remoto && Array.isArray(remoto.planes)) {
+      datos = { empresa: remoto.empresa, planes: remoto.planes };
+      renderPublico();
+    }
+  } catch {
+    // Sin conexión: se queda con los planes por defecto ya pintados.
+  }
 }
 
-function persistirProyectos() {
-  localStorage.setItem(CLAVE_PROYECTOS, JSON.stringify(proyectos));
+async function persistirDatos() {
+  try {
+    const resp = await fetch("/api/empresa", {
+      method: "PUT",
+      headers: encabezadosAdmin({ "Content-Type": "application/json" }),
+      body: JSON.stringify(datos),
+    });
+    if (!resp.ok) throw new Error();
+  } catch {
+    aviso("No se pudo guardar en el servidor", "error");
+  }
+}
+
+async function enviarSolicitudAlServidor(solicitud) {
+  try {
+    const resp = await fetch("/api/solicitudes", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(solicitud),
+    });
+    if (!resp.ok) throw new Error();
+  } catch {
+    aviso("La solicitud se envió por WhatsApp, pero no se pudo guardar en el panel", "error");
+  }
+}
+
+async function cargarSolicitudesDesdeServidor() {
+  const resp = await fetch("/api/solicitudes", { headers: encabezadosAdmin() });
+  if (!resp.ok) throw new Error();
+  solicitudes = await resp.json();
+}
+
+async function vaciarSolicitudesEnServidor() {
+  try {
+    const resp = await fetch("/api/solicitudes", { method: "DELETE", headers: encabezadosAdmin() });
+    if (!resp.ok) throw new Error();
+  } catch {
+    aviso("No se pudo vaciar en el servidor", "error");
+  }
+}
+
+async function cargarProyectosDesdeServidor() {
+  const resp = await fetch("/api/proyectos", { headers: encabezadosAdmin() });
+  if (!resp.ok) throw new Error();
+  proyectos = await resp.json();
+}
+
+async function crearProyectoEnServidor(proyecto) {
+  try {
+    const resp = await fetch("/api/proyectos", {
+      method: "POST",
+      headers: encabezadosAdmin({ "Content-Type": "application/json" }),
+      body: JSON.stringify(proyecto),
+    });
+    if (!resp.ok) throw new Error();
+  } catch {
+    aviso("No se pudo guardar el proyecto en el servidor", "error");
+  }
+}
+
+async function actualizarProyectoEnServidor(proyecto) {
+  try {
+    const resp = await fetch("/api/proyectos", {
+      method: "PUT",
+      headers: encabezadosAdmin({ "Content-Type": "application/json" }),
+      body: JSON.stringify(proyecto),
+    });
+    if (!resp.ok) throw new Error();
+  } catch {
+    aviso("No se pudo actualizar el proyecto en el servidor", "error");
+  }
+}
+
+async function eliminarProyectoEnServidor(id) {
+  try {
+    const resp = await fetch(`/api/proyectos?id=${encodeURIComponent(id)}`, {
+      method: "DELETE",
+      headers: encabezadosAdmin(),
+    });
+    if (!resp.ok) throw new Error();
+  } catch {
+    aviso("No se pudo eliminar el proyecto en el servidor", "error");
+  }
 }
 
 function planPorId(id) {
@@ -1443,12 +1519,23 @@ function sesionActiva() {
   return sessionStorage.getItem(CLAVE_SESION) === "1";
 }
 
-function mostrarSegunSesion() {
+async function mostrarSegunSesion() {
   const logueado = sesionActiva();
   $("#admin-login").hidden = logueado;
   $("#admin-panel").hidden = !logueado;
   if (logueado) {
     renderAdminPlanes();
+    try {
+      await Promise.all([cargarSolicitudesDesdeServidor(), cargarProyectosDesdeServidor()]);
+    } catch {
+      tokenAdmin = "";
+      sessionStorage.removeItem(CLAVE_SESION);
+      sessionStorage.removeItem(CLAVE_TOKEN);
+      $("#admin-login").hidden = false;
+      $("#admin-panel").hidden = true;
+      aviso("La sesión expiró, entra de nuevo", "error");
+      return;
+    }
     renderSolicitudes();
     renderAdminProyectos();
   }
@@ -1626,18 +1713,20 @@ function guardarProyectoDesdeForm(evento) {
       cliente, telefono, planId, precioVenta, costoMateriales, costoManoObra,
       recordatorioFecha, recordatorioNota, notas,
     });
+    actualizarProyectoEnServidor(proyecto);
   } else {
-    proyectos.unshift({
+    const nuevoProyecto = {
       id: Date.now().toString(36),
       cliente, telefono, planId, precioVenta, costoMateriales, costoManoObra,
       recordatorioFecha, recordatorioNota, notas,
       estado: "abierto",
       fechaCreacion: new Date().toISOString(),
       fechaCierre: "",
-    });
+    };
+    proyectos.unshift(nuevoProyecto);
+    crearProyectoEnServidor(nuevoProyecto);
   }
 
-  persistirProyectos();
   renderAdminProyectos();
   cerrarEditorProyecto();
   aviso(idEdicion ? "Proyecto actualizado" : "Proyecto creado");
@@ -1648,7 +1737,7 @@ function cerrarProyecto(id) {
   if (!p) return;
   p.estado = "cerrado";
   p.fechaCierre = new Date().toISOString();
-  persistirProyectos();
+  actualizarProyectoEnServidor(p);
   renderAdminProyectos();
   aviso("Proyecto cerrado");
 }
@@ -1658,7 +1747,7 @@ function reabrirProyecto(id) {
   if (!p) return;
   p.estado = "abierto";
   p.fechaCierre = "";
-  persistirProyectos();
+  actualizarProyectoEnServidor(p);
   renderAdminProyectos();
   aviso("Proyecto reabierto");
 }
@@ -1668,7 +1757,7 @@ function borrarProyecto(id) {
   if (!p) return;
   if (!confirm(`¿Eliminar el proyecto de «${p.cliente}»? Esta acción no se puede deshacer.`)) return;
   proyectos = proyectos.filter((item) => item.id !== id);
-  persistirProyectos();
+  eliminarProyectoEnServidor(id);
   renderAdminProyectos();
   aviso("Proyecto eliminado");
 }
@@ -1821,7 +1910,7 @@ function manejarEnvioSolicitud(evento) {
     nota,
   };
   solicitudes.unshift(solicitud);
-  persistirSolicitudes();
+  enviarSolicitudAlServidor(solicitud);
   actualizarContadorSolicitudes();
   evento.target.reset();
   limpiarEstadoMapa();
@@ -1847,6 +1936,7 @@ function init() {
   $("#anio-actual").textContent = new Date().getFullYear();
 
   renderPublico();
+  cargarEmpresaDesdeServidor();
   aplicarRuta();
   mostrarSegunSesion();
 
@@ -1890,23 +1980,34 @@ function init() {
   });
 
   // Login admin
-  $("#form-login").addEventListener("submit", (e) => {
+  $("#form-login").addEventListener("submit", async (e) => {
     e.preventDefault();
     const usuario = $("#login-usuario").value.trim();
     const clave = $("#login-clave").value;
-    if (usuario === "admin" && clave === "airecare") {
+    try {
+      const resp = await fetch("/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ usuario, clave }),
+      });
+      if (!resp.ok) throw new Error();
+      const { token } = await resp.json();
+      tokenAdmin = token;
+      sessionStorage.setItem(CLAVE_TOKEN, token);
       sessionStorage.setItem(CLAVE_SESION, "1");
       e.target.reset();
       $("#login-error").hidden = true;
       mostrarSegunSesion();
       aviso("Sesión iniciada");
-    } else {
+    } catch {
       $("#login-error").hidden = false;
     }
   });
 
   $("#btn-logout").addEventListener("click", () => {
+    tokenAdmin = "";
     sessionStorage.removeItem(CLAVE_SESION);
+    sessionStorage.removeItem(CLAVE_TOKEN);
     mostrarSegunSesion();
     aviso("Sesión cerrada");
   });
@@ -1973,7 +2074,7 @@ function init() {
     if (!solicitudes.length) return;
     if (!confirm("¿Vaciar todas las solicitudes guardadas?")) return;
     solicitudes = [];
-    persistirSolicitudes();
+    vaciarSolicitudesEnServidor();
     renderSolicitudes();
     aviso("Solicitudes eliminadas");
   });
