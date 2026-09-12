@@ -444,11 +444,14 @@ textarea { resize: vertical; }
 }
 .resumen-card .etiqueta { font-size: 0.75rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
 .resumen-card .monto { font-size: 1.15rem; font-weight: 800; color: var(--texto); }
+.resumen-card.resumen-cotizado .monto { color: var(--primario); }
+.resumen-card.resumen-aprobado .monto { color: var(--exito); }
 .resumen-card.resumen-inversion .monto { color: var(--primario); }
 .resumen-card.resumen-cobrar .monto { color: #b35c00; }
 .resumen-card.resumen-cobrado .monto { color: var(--exito); }
 .resumen-card.resumen-utilidad .monto { color: var(--exito); }
 .resumen-card.resumen-utilidad .monto.negativa { color: var(--peligro); }
+.resumen-nota { font-size: 0.82rem; color: var(--muted); margin: -8px 0 16px; }
 
 .filtros-proyectos { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
 .filtro-proyecto {
@@ -1453,43 +1456,63 @@ function actualizarContadorRecordatorios() {
   el.hidden = pendientes === 0;
 }
 
+function sumarProyectos(lista, fn) {
+  return lista.reduce((suma, p) => suma + fn(p), 0);
+}
+
 function renderResumenEconomico() {
   const contenedor = $("#resumen-economico");
-  const aprobados = proyectos.filter((p) => p.estado === "aprobado" || p.estado === "cerrado");
-  if (!aprobados.length) {
+  if (!proyectos.length) {
     contenedor.hidden = true;
     contenedor.innerHTML = "";
     return;
   }
 
-  const totalInversion = aprobados.reduce((s, p) => s + inversionProyecto(p), 0);
-  const totalPorCobrarContrato = aprobados.reduce((s, p) => s + Number(p.precioVenta || 0), 0);
-  const totalCobrado = aprobados.reduce((s, p) => s + cobradoProyecto(p), 0);
-  const totalPendiente = aprobados.reduce((s, p) => s + porCobrarProyecto(p), 0);
-  const totalUtilidad = aprobados.reduce((s, p) => s + utilidadProyecto(p), 0);
+  const cotizaciones = proyectos.filter((p) => p.estado === "cotizacion");
+  const aprobados = proyectos.filter((p) => p.estado === "aprobado");
+  const activos = proyectos.filter((p) => p.estado === "aprobado" || p.estado === "cerrado");
+
+  // Totales globales sumando todos los proyectos del estado correspondiente
+  const totalCotizado = sumarProyectos(cotizaciones, (p) => Number(p.precioVenta || 0));
+  const totalAprobado = sumarProyectos(aprobados, (p) => Number(p.precioVenta || 0));
+  const totalPorInvertir = sumarProyectos(aprobados, inversionProyecto);
+  const totalCobrado = sumarProyectos(activos, cobradoProyecto);
+  const totalPorCobrar = sumarProyectos(aprobados, porCobrarProyecto);
+  const gananciasEstimadas = sumarProyectos(aprobados, utilidadProyecto);
+
+  const nCot = cotizaciones.length;
+  const nApr = aprobados.length;
 
   contenedor.hidden = false;
   contenedor.innerHTML = `
+    <div class="resumen-card resumen-cotizado">
+      <span class="etiqueta">Total cotizado</span>
+      <span class="monto">${formatoPrecio(totalCotizado)}</span>
+    </div>
+    <div class="resumen-card resumen-aprobado">
+      <span class="etiqueta">Total aprobado</span>
+      <span class="monto">${formatoPrecio(totalAprobado)}</span>
+    </div>
     <div class="resumen-card resumen-inversion">
-      <span class="etiqueta">Inversión</span>
-      <span class="monto">${formatoPrecio(totalInversion)}</span>
+      <span class="etiqueta">Total por invertir</span>
+      <span class="monto">${formatoPrecio(totalPorInvertir)}</span>
     </div>
     <div class="resumen-card resumen-cobrar">
-      <span class="etiqueta">Por cobrar (contratos)</span>
-      <span class="monto">${formatoPrecio(totalPorCobrarContrato)}</span>
+      <span class="etiqueta">Total por cobrar</span>
+      <span class="monto">${formatoPrecio(totalPorCobrar)}</span>
     </div>
     <div class="resumen-card resumen-cobrado">
-      <span class="etiqueta">Cobrado</span>
+      <span class="etiqueta">Total cobrado</span>
       <span class="monto">${formatoPrecio(totalCobrado)}</span>
     </div>
-    <div class="resumen-card resumen-cobrar">
-      <span class="etiqueta">Pendiente de cobro</span>
-      <span class="monto">${formatoPrecio(totalPendiente)}</span>
-    </div>
     <div class="resumen-card resumen-utilidad">
-      <span class="etiqueta">Utilidad estimada</span>
-      <span class="monto${totalUtilidad < 0 ? " negativa" : ""}">${formatoPrecio(totalUtilidad)}</span>
-    </div>`;
+      <span class="etiqueta">Ganancias estimadas</span>
+      <span class="monto${gananciasEstimadas < 0 ? " negativa" : ""}">${formatoPrecio(gananciasEstimadas)}</span>
+    </div>
+    <p class="resumen-nota" style="grid-column: 1 / -1;">
+      Totales de ${nCot} ${nCot === 1 ? "cotización" : "cotizaciones"} y ${nApr} ${nApr === 1 ? "proyecto aprobado" : "proyectos aprobados"}.
+      Cotizado = suma de cotizaciones; aprobado / por invertir / por cobrar / ganancias = suma de aprobados; cobrado incluye cerrados.
+    </p>`;
 }
 
 function htmlListaCobros(p) {

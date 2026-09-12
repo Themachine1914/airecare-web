@@ -32,7 +32,7 @@ y abre **http://localhost:3000** (el servidor es `servidor.js`, hecho solo con N
 1. **Crear cotización** — cliente, plan, monto por cobrar e inversión.
 2. **Aprobar** — pasa a proyecto aprobado; entra en el resumen económico.
 3. **Registrar cobros** — monto + fecha de cobro (pueden ser parciales).
-4. **Resumen económico** — totales de inversión, por cobrar (contratos), cobrado, pendiente y utilidad estimada sobre proyectos aprobados y cerrados.
+4. **Resumen económico (suma de todos los proyectos)** — total cotizado, total aprobado, total por invertir, total por cobrar, total cobrado y ganancias estimadas.
 
 El botón **«Restaurar datos originales»** en el admin vuelve a cargar los 5 planes iniciales. Para reiniciar todo, borra las claves del sitio en las herramientas de desarrollador del navegador.
 
